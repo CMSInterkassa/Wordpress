@@ -39,6 +39,12 @@ function woocommerce_init()
             $this->language = $this->get_option('language');
             $this->paymenttime = $this->get_option('paymenttime');
             $this->payment_method = $this->get_option('payment_method');
+
+            $this->ip_stack = array(
+                'ip_begin' => '151.80.190.97',
+                'ip_end'   => '151.80.190.104'
+            );
+            
             // Actions
             add_action('woocommerce_receipt_interkassa', array($this, 'receipt_page'));
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
@@ -193,7 +199,17 @@ function woocommerce_init()
             global $woocommerce;
 
             if ($_POST['ik_co_id']) {
-                $ik_key = $this->secret;
+                if(!ip2long($_SERVER['REMOTE_ADDR'])>=ip2long($this->ip_stack['ip_begin']) && !ip2long($_SERVER['REMOTE_ADDR'])<=ip2long($this->ip_stack['ip_end'])){
+                    die('Ты мошенник! Пшел вон отсюда!');
+                }
+                //if(!checkIP($_SERVER['REMOTE_ADDR'], $this->ip_stack['ip_begin'], $this->ip_stack['ip_end'])) exit('Ты мошенник! Пшел нах отсюда!');
+
+                if(isset($_POST['ik_pw_via']) && $_POST['ik_pw_via'] == 'test_interkassa_test_xts'){
+                    $ik_key = $this->test_key;
+                } else {
+                    $ik_key = $this->secret;
+                }
+                
                 $merchant_id = $this->merchant_id;
                 $data = array();
                 foreach ($_REQUEST as $key => $value) {
@@ -208,7 +224,7 @@ function woocommerce_init()
                 $signString = implode(':', $data);
                 $sign = base64_encode(md5($signString, true));
 
-                if ($sign === $ik_sign || $data['ik_co_id'] === $merchant_id) {
+                if ($sign == $ik_sign && $data['ik_co_id'] == $merchant_id) {
                     $order_id = $data['ik_pm_no'];
                     $order = new WC_Order($order_id);
 
