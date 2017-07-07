@@ -1,14 +1,16 @@
 
-    <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#InterkassaModal">Выбрать платежную систему</button>
+    <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#InterkassaModal"><?php
+        _e('Выбрать платежную систему','interkassa');
+    ?></button>
 
     <div id="InterkassaModal" class="modal fade" role="dialog">
         <div class="modal-dialog modal-lg">
             <div class="modal-content" id="plans">
                 <div class="container">
                 <h1>
-                            1.Выберите удобный способ оплаты<br>
-                            2.Укажите валюту<br>
-                            3.Нажмите "Оплатить"
+                            1. <?php _e('Выберите удобный способ оплаты','interkassa'); ?><br>
+                            2. <?php _e('Укажите валюту','interkassa'); ?><br>
+                            3. <?php _e('Нажмите &laquo;Оплатить&raquo;','interkassa'); ?><br>
                         </h1>
                     <div class="row">
                         
@@ -38,8 +40,8 @@
                                     </div>
                                     <div class="panel-footer">
                                         <a class="btn btn-block btn-success ik-payment-confirmation" data-title="<?php echo $ps ; ?>"
-                                           href="#">Оплатить с
-                                            <br>
+                                           href="#"><?php _e('Оплатить с','interkassa'); ?>
+										   <br>
                                             <strong><?php echo $info['title'] ; ?></strong>
                                         </a>
                                     </div>
@@ -68,7 +70,7 @@
         $('.ik-payment-confirmation').click(function (e) {
             e.preventDefault();
             if(!curtrigger){
-                alert('Вы не выбрали валюту');
+                alert('<?php _e('Вы не выбрали валюту','interkassa'); ?>');
                 return;
             }else{
                 form.submit();
@@ -116,7 +118,6 @@
 
 
 
-    </script>
     </script>
 <style>
     #InterkassaModal .input-group,#InterkassaModal h1{

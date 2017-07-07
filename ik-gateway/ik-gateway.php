@@ -12,6 +12,9 @@ if (!defined('ABSPATH')) exit;
 
 add_action('plugins_loaded', 'woocommerce_init', 0);
 
+$plugin_dir = basename(dirname(__FILE__));
+load_plugin_textdomain( 'interkassa', '/wp-content/plugins/'. $plugin_dir , $plugin_dir );
+
 function woocommerce_init()
 {
 
@@ -19,16 +22,16 @@ function woocommerce_init()
 
     class WC_Gateway_Interkassa extends WC_Payment_Gateway
     {
-
         public function __construct()
         {
 
             global $woocommerce;
+            global $interkassa;
 
             $this->id = 'interkassa';
             $this->has_fields = false;
-            $this->method_title = __('Интеркасса 2.0', 'woocommerce');
-            $this->method_description = __('Интеркасса 2.0', 'woocommerce');
+            $this->method_title = __('Интеркасса 2.0', 'interkassa');
+            $this->method_description = __('Интеркасса 2.0', 'interkassa');
             $this->init_form_fields();
             $this->init_settings();
             $this->title = $this->get_option('title');
@@ -68,9 +71,12 @@ function woocommerce_init()
 
         public function admin_options()
         {
+            global $woocommerce;
+            global $interkassa;
+
 
             ?>
-            <h3><?php _e('ИнтерКасса 2.0', 'woocommerce'); ?></h3>
+            <h3><?php _e('Интеркасса 2.0', 'interkassa'); ?></h3>
 
             <?php if ($this->is_valid_for_use()) { ?>
 
@@ -83,7 +89,7 @@ function woocommerce_init()
 
             <?php } else { ?>
             <div class="inline error"><p>
-                    <strong><?php _e('Шлюз отключен', 'woocommerce'); ?></strong>: <?php _e('Единая Касса не поддерживает валюты Вашего магазина.', 'woocommerce'); ?>
+                    <strong><?php __('Шлюз отключен', 'interkassa'); ?></strong>: <?php __('Единая Касса не поддерживает валюты Вашего магазина.', 'woocommerce'); ?>
                 </p></div>
             <?php
             }
@@ -91,63 +97,65 @@ function woocommerce_init()
 
         public function init_form_fields()
         {
+            global $woocommerce;
+            global $interkassa;
 
             $this->form_fields = array(
                 'enabled' => array(
-                    'title' => __('Включить/Отключить', 'woocommerce'),
+                    'title' => __('Вкл. / Выкл.', 'interkassa'),
                     'type' => 'checkbox',
-                    'label' => __('Включить', 'woocommerce'),
+                    'label' => __('Включить', 'interkassa'),
                     'default' => 'yes'
                 ),
                 'test_mode' => array(
-                    'title' => __('Тестовый режим', 'woocommerce'),
+                    'title' => __('Тестовый режим', 'interkassa'),
                     'type' => 'checkbox',
-                    'label' => __('Включить тестовый режим', 'woocommerce'),
+                    'label' => __('Включить тестовый режим', 'interkassa'),
                     'default' => 'yes'
                 ),
                 'test_key' => array(
-                    'title' => __('Тестовый ключ', 'woocommerce'),
+                    'title' => __('Тестовый ключ', 'interkassa'),
                     'type' => 'text',
-                    'description' => __('Введите тестовый ключ', 'woocommerce'),
+                    'description' => __('Введите тестовый ключ', 'interkassa'),
                 ),
                 'title' => array(
-                    'title' => __('Заголовок', 'woocommerce'),
+                    'title' => __('Заголовок', 'interkassa'),
                     'type' => 'text',
-                    'description' => __('Заголовок, который отображается на странице оформления заказа', 'woocommerce'),
-                    'default' => 'Интеркасса',
+                    'description' => __('Заголовок, который отображается на странице оформления заказа', 'interkassa'),
+                    'default' => __('Интеркасса', 'interkassa'),
                     'desc_tip' => true,
                 ),
                 'description' => array(
-                    'title' => __('Описание', 'woocommerce'),
+                    'title' => __('Описание', 'interkassa'),
                     'type' => 'textarea',
-                    'description' => __('Описание, которое отображается в процессе выбора формы оплаты', 'woocommerce'),
-                    'default' => __('Оплатить через электронную платежную систему Интеркасса', 'woocommerce'),
+                    'description' => __('Описание, которое отображается в процессе выбора формы оплаты', 'interkassa'),
+                    'default' => __('Оплатить через электронную платежную систему Интеркасса', 'interkassa'),
                 ),
                 'merchant_id' => array(
-                    'title' => __('Индефикатор кассы', 'woocommerce'),
+                    'title' => __('Индефикатор кассы', 'interkassa'),
                     'type' => 'text',
-                    'description' => __('Уникальный идентификатор кассы в системе Интеркасса.', 'woocommerce'),
+                    'description' => __('Уникальный идентификатор кассы в системе Интеркасса.', 'interkassa'),
                 ),
                 'secret' => array(
-                    'title' => __('Секретный ключ', 'woocommerce'),
+                    'title' => __('Секретный ключ', 'interkassa'),
                     'type' => 'text',
-                    'description' => __('Секретный ключ', 'woocommerce'),
+                    'description' => __('Секретный ключ', 'interkassa'),
                 ),
                 'enabledAPI' => array(
-                    'title' => __('Включить API/Отключить API', 'woocommerce'),
+                    'title' => __('Включить API/Отключить API', 'interkassa'),
                     'type' => 'checkbox',
-                    'label' => __('Включить API', 'woocommerce'),
+                    'label' => __('Включить API', 'interkassa'),
                     'default' => 'no'
                 ),
                 'api_id' => array(
-                    'title' => __('API Id', 'woocommerce'),
+                    'title' => 'API Id',
                     'type' => 'text',
-                    'description' => __('Находится в настройках аккаунта в разделе API.', 'woocommerce'),
+                    'description' => __('Находится в настройках аккаунта в разделе API.', 'interkassa'),
                 ),
                 'api_key' => array(
-                    'title' => __('API Key', 'woocommerce'),
+                    'title' => 'API Key',
                     'type' => 'text',
-                    'description' => __('Находится в настройках аккаунта в разделе API.', 'woocommerce'),
+                    'description' => __('Находится в настройках аккаунта в разделе API.', 'interkassa'),
                 ),
 
             );
@@ -175,8 +183,9 @@ function woocommerce_init()
 
         public function receipt_page($order)
         {
+            global $interkassa;
 
-            echo '<p>' . __('Спасибо за Ваш заказ, пожалуйста, нажмите кнопку ниже, чтобы заплатить.', 'woocommerce') . '</p>';
+            echo '<p>' . __('Спасибо за Ваш заказ, пожалуйста, нажмите кнопку ниже, чтобы заплатить.', 'interkassa') . '</p>';
             echo $this->generate_form($order);
             if($this->enabledAPI == 'yes'){
             	echo $this->generateAPI();
@@ -186,6 +195,7 @@ function woocommerce_init()
         public function generate_form($order_id)
         {
             global $woocommerce;
+            global $interkassa;
 
             $order = new WC_Order($order_id);
             $action_adr = "https://sci.interkassa.com/";
@@ -197,6 +207,7 @@ function woocommerce_init()
                 'ik_co_id' => $this->merchant_id,
                 'ik_pm_no' => $order_id,
                 'ik_desc' => "#$order_id",
+                'ik_loc' => substr(get_locale(),0,2),
                 'ik_ia_u'=>str_replace('https:', 'http:', add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/'))),
                 'ik_suc_u'=>str_replace('https:', 'http:', add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/'))),
                 'ik_fal_u'=>str_replace('https:', 'http:', add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/'))),
@@ -217,14 +228,16 @@ function woocommerce_init()
 
             return
                 '<form accept-charset="windows-1251" action="' . esc_url($action_adr) . '" method="POST" name="interkassa_form">' .
-                '<input type="submit" class="button alt" id="submit_interkassa_button" value="' . __('Оплатить', 'woocommerce') . '" /> <a class="button cancel" href="' . $order->get_cancel_order_url() . '">' . __('Отказаться от оплаты & вернуться в корзину', 'woocommerce') . '</a>' . "\n" .
+                '<input type="submit" class="button alt" id="submit_interkassa_button" value="' . __('Оплатить', 'interkassa') . '" /> <a class="button cancel" href="' . $order->get_cancel_order_url() . '">' . _e('Отказаться от оплаты & вернуться в корзину', 'interkassa') . '</a>' . "\n" .
                 implode("\n", $args_array) .
                 '</form>';
         }
 
         public function check_ipn_response()
         {
+
             global $woocommerce;
+            global $interkassa;
 
             if ($_POST['ik_co_id']) {
 
@@ -258,10 +271,10 @@ function woocommerce_init()
 
                     if ($data['ik_inv_st'] == 'success') {
                         $order->payment_complete();
-                        $order->add_order_note(__('Платеж успешно оплачен через Интеркассу', 'woocommerce'));
+                        $order->add_order_note(_e('Платеж успешно оплачен через Интеркассу', 'interkassa'));
                     } else if ($data['ik_inv_st'] == 'fail') {
-                        $order->update_status('failed', __('Платеж не оплачен', 'woocommerce'));
-                        $order->add_order_note(__('Платеж не оплачен', 'woocommerce'));
+                        $order->update_status('failed', _e('Платеж не оплачен', 'interkassa'));
+                        $order->add_order_note(_e('Платеж не оплачен', 'interkassa'));
                     }
 
                     $woocommerce->cart->empty_cart();
@@ -312,6 +325,8 @@ function woocommerce_init()
 	    }
 
         public function generateAPI(){
+            global $woocommerce;
+            global $interkassa;
 
 			$ajax_url = str_replace('https:', 'http:', add_query_arg('wc-api', 'WC_Ik_sign', home_url('/')));
         	$image_path = plugin_dir_url('ik-gateway').'ik-gateway/paysystems/';
