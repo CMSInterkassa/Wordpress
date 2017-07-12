@@ -228,7 +228,7 @@ function woocommerce_init()
 
             return
                 '<form accept-charset="windows-1251" action="' . esc_url($action_adr) . '" method="POST" name="interkassa_form">' .
-                '<input type="submit" class="button alt" id="submit_interkassa_button" value="' . __('Оплатить', 'interkassa') . '" /> <a class="button cancel" href="' . $order->get_cancel_order_url() . '">' . _e('Отказаться от оплаты & вернуться в корзину', 'interkassa') . '</a>' . "\n" .
+                '<input type="submit" class="button alt" id="submit_interkassa_button" value="' . __('Оплатить', 'interkassa') . '" /> <a class="button cancel" href="' . $order->get_cancel_order_url() . '">' . __('Отказаться от оплаты & вернуться в корзину', 'interkassa') . '</a>' . "\n" .
                 implode("\n", $args_array) .
                 '</form>';
         }
