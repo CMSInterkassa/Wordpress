@@ -132,7 +132,7 @@ function woocommerce_init()
                     'default' => __('Оплатить через электронную платежную систему Интеркасса', 'interkassa'),
                 ),
                 'merchant_id' => array(
-                    'title' => __('Индефикатор кассы', 'interkassa'),
+                    'title' => __('Идентификатор кассы', 'interkassa'),
                     'type' => 'text',
                     'description' => __('Уникальный идентификатор кассы в системе Интеркасса.', 'interkassa'),
                 ),
