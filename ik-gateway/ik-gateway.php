@@ -201,7 +201,6 @@ function woocommerce_init()
             $action_adr = "https://sci.interkassa.com/";
             $result_url = str_replace('https:', 'http:', add_query_arg('wc-api', 'wc_gateway_interkassa', home_url('/')));
 
-            $protocol =  $_SERVER['SERVER_PORT'] == 443 ? 'https:' : 'http';
 
             $args = array(
                 'ik_am' => $order->order_total,
@@ -210,10 +209,10 @@ function woocommerce_init()
                 'ik_pm_no' => $order_id,
                 'ik_desc' => "#$order_id",
                 'ik_loc' => substr(get_locale(),0,2),
-                'ik_ia_u'=>$protocol.add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/')),
-                'ik_suc_u'=>$protocol.add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/')),
-                'ik_fal_u'=>$protocol.add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/')),
-                'ik_pnd_u'=>$protocol.add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/'))
+                'ik_ia_u'=>add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/')),
+                'ik_suc_u'=>add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/')),
+                'ik_fal_u'=>add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/')),
+                'ik_pnd_u'=>add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/'))
             );
 
             ksort($args, SORT_STRING);
