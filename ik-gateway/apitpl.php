@@ -1,4 +1,4 @@
-<button id="InterkassaModalButton"><?php _e('Выбрать платежную систему', 'interkassa'); ?></button>
+<button id="InterkassaModalButton" style="display:none;"><?php _e('Выбрать платежную систему', 'interkassa'); ?></button>
 
 
 <div id="InterkassaModal" class="interkassa-modal">
@@ -18,7 +18,7 @@
                         <div class="panel panel-warning panel-pricing">
                             <div class="panel-heading">
                                 <img src="<?php echo $image_path; ?><?php echo $ps; ?>.png" alt="<?php echo $info['title']; ?>">
-                                <h3><?php echo $info['title']; ?></h3>
+                               <!-- <h3><?php //echo $info['title']; ?></h3>-->
                             </div>
                             <div class="form-group">
                                 <div class="input-group">
@@ -38,13 +38,18 @@
                             </div>
                             <div class="button-footer">
 
-                                <a class="btn btn-block btn-success ik-payment-confirmation" data-title="<?php echo $ps; ?>"
-                                   href="#"><?php _e('Оплатить с', 'interkassa'); ?> <?php echo $info['title']; ?>
-                                </a>
+                                <!--<a class="btn btn-block btn-success ik-payment-confirmation" data-title="<?php echo $ps; ?>"
+                                   href="#"><?php #_e('Оплатить с', 'interkassa'); ?> <?php #echo $info['title']; ?>
+                                </a>-->
                             </div>
                         </div>
                     </div>
                 <?php } ?>
+                <div>
+                	<a class="btn btn-lg btn-block-secondary btn-success ik-payment-confirmation" data-title="<?php echo $ps; ?>"
+                                   href="#"><?php _e('Оплатить', 'interkassa'); ?>
+                                </a>
+            	</div>
             </div>
         </div>
     </div>
@@ -52,6 +57,102 @@
 
 
 <script type="text/javascript">
+
+	function test(){
+		$("#InterkassaModalButton").click();
+	}
+
+	function paystart(data){
+		data_array = JSON.parse(data);
+        console.log(data_array);
+        var form = $('form[name="interkassa_form"]');
+        if(data_array['resultCode']!=0){
+            //alert(data_array['resultMsg']);
+            form[0].action="https://sci.interkassa.com/";
+            $('input[name =  "ik_act"]').remove();
+            $('input[name =  "ik_int"]').remove();
+                form.submit();
+        }
+        else{
+            if(data_array['resultData']['paymentForm']!=undefined)
+            {
+                var data_send_form=[];
+                var data_send_inputs=[];
+                data_send_form['url'] = data_array['resultData']['paymentForm']['action'];
+                data_send_form['method'] = data_array['resultData']['paymentForm']['method'];
+                for(var i in data_array['resultData']['paymentForm']['parameters']){
+                    data_send_inputs[i]=data_array['resultData']['paymentForm']['parameters'][i];
+                }
+                $('body').append('<form method="'+data_send_form['method']+'" id="tempform" action="'+data_send_form['url']+'"></form>');
+                for(var i in data_send_inputs){
+                    $("#tempform").append('<input type="hidden" name="'+i+'" value="'+data_send_inputs[i]+'" />');
+                }
+                $('#tempform').submit();
+            }
+            else{
+                $('form[name= "interkassa_form"]').append('<div id="tempdiv">'+data_array['resultData']['internalForm']+'</div>');
+                var form2=$('#internalForm');
+                //$('input[name =  "ik_act"]').remove();
+                //$('input[name =  "ik_int"]').remove();
+                //$('input[name =  "sci[ik_int]"]').remove();
+                form2[0].action="javascript:test2()";
+            }
+        }
+	}
+
+	function test2(){
+    var form2=$('#internalForm');
+    var msg2 = form2.serialize();
+    //console.log(msg2);
+        $.ajax({
+            type: 'POST',
+            url: '<?php echo $ajax_url2?>',
+            data: msg2,
+            success: function(data) {
+                paystart2(data);
+            },
+            error:  function(xhr, str){
+                alert('Возникла ошибка: ' + xhr.responseCode);
+            }
+        });
+    }
+
+    function paystart2(string){
+        data_array = JSON.parse(string);
+        console.log(data_array);
+        var form2=$('#internalForm');
+        if(data_array['resultCode']!=0){
+           // alert(data_array['resultMsg']);
+            form2[0].action="https://sci.interkassa.com/";
+            $('input[name =  "ik_act"]').remove();
+            $('input[name =  "ik_int"]').remove();
+            $('input[name =  "sci[ik_int]"]').remove();
+            //console.log(form2);
+            //console.log(form2[0]);
+            form2.submit();
+        }
+        else{
+            $('#tempdiv').html('');
+            if(data_array['resultData']['paymentForm']!=undefined)
+            {
+                var data_send_form=[];
+                var data_send_inputs=[];
+                data_send_form['url'] = data_array['resultData']['paymentForm']['action'];
+                data_send_form['method'] = data_array['resultData']['paymentForm']['method'];
+                for(var i in data_array['resultData']['paymentForm']['parameters']){
+                    data_send_inputs[i]=data_array['resultData']['paymentForm']['parameters'][i];
+                }
+                $('#tempdiv').append('<form method="'+data_send_form['method']+'" id="tempform2" action="'+data_send_form['url']+'"></form>');
+                for(var i in data_send_inputs){
+                    $("#tempform2").append('<input type="hidden" name="'+i+'" value="'+data_send_inputs[i]+'" />');
+                }
+                $('#tempform2').submit();
+            }
+            else{
+                $('.woocommerce').append('<div id="tempdiv">'+data_array['resultData']['internalForm']+'</div>');
+            }
+        }
+    }
 
     $ = jQuery;
 
@@ -75,13 +176,40 @@
 
         var curtrigger = false;
         var form = $('form[name="interkassa_form"]');
+        form[0].action = "javascript:test()";
         $('.ik-payment-confirmation').click(function (e) {
             e.preventDefault();
             if (!curtrigger) {
                 alert('Вы не выбрали валюту');
                 return;
             } else {
-                form.submit();
+            	if($('input[name =  "ik_pw_via"]').val()!='test_interkassa_test_xts' || $('input[name = "ik_pw_via"]').val()=="svyaznoy_wp_merchantTn_rub" || $('input[name = "ik_pw_via"]').val()=="euroset_wp_merchantTn_rub")
+            	{
+            	 	form.append(
+                            $('<input>', {
+                                type: 'hidden',
+                                name: 'ik_act',
+                                val: 'process'
+                            }));
+                	form.append(
+                            $('<input>', {
+                                type: 'hidden',
+                                name: 'ik_int',
+                                val: 'json'
+                            }));
+            		$.post('<?php echo $ajax_url2; ?>', form.serialize())
+                	.done(function (data) {
+                		paystart(data);
+                	})
+                	.fail(function () {
+                    	alert('Something wrong');
+                	});
+                }
+                else{
+                	form[0].action="https://sci.interkassa.com/";
+                	form.submit();
+                }
+            	modal.style.display = "none";
             }
         });
         $('#radioBtn a').click(function () {
@@ -124,6 +252,7 @@
 
 </script>
 <style>
+
     #InterkassaModal {
         transition: 1s;
     }
@@ -138,16 +267,20 @@
     .payment_system h3, .payment_system img {
         display: inline-block;
         width: 100%;
-        font-size: 18px;
+        /*font-size: 18px;
         margin: 0;
-        padding-top: 10px;
+        padding-top: 10px;*/
     }
 
     .payment_system .panel-heading {
         text-align: center;
     }
 
-    .payment_system .btn-primary {
+    .btn-primary {
+        background-color: red;
+    }
+    
+/*    .payment_system .btn-primary {
         background-image: none;
     }
 
@@ -156,9 +289,10 @@
         justify-content: center;
         flex-wrap: wrap;
     }
-
+*/
     .payment_system .btn-primary, .payment_system .btn-secondary, .payment_system .btn-tertiary {
-        padding: 2px;
+        padding: 8px;
+        font-size:10px;
     }
 
     .panel-pricing {
@@ -202,7 +336,7 @@
         padding: 20px;
         margin: 0px;
     }
-    #radioBtn{
+    /*#radioBtn{
         padding: 20px 10px;
     }
     #radioBtn a{
@@ -210,18 +344,20 @@
     }
     #radioBtn a:hover{
         transform: scale(1.02);
-    }
+    }*/
     #radioBtn .notActive {
-        background-color: #48bd82;
+    	color: #3276b1;
+        background-color: #fff;
+        /*background-color: #48bd82;
         border: 2px solid #48bd82;
         color: #fff;
-        cursor: pointer;
+        cursor: pointer;*/
     }
-    #radioBtn .active {
+   /* #radioBtn .active {
         background-color: #fff;
         color: #48bd82;
         border: 2px solid #48bd82;
-    }
+    }*/
 
     .interkassa-modal {
         display: none;
@@ -290,7 +426,19 @@
         transform: scale(1.02);
     }
 
-
+    .btn-block-secondary{
+        display:block;
+        text-align: center;
+        width:30%;
+        position: relative;
+        margin: auto;
+        margin-top:10px;
+    }
+ 
+ 	#phone{
+ 		width:50%;
+ 		display:inline;
+ 	}
 
     @media only screen and (min-width:768px) and (max-width:1200px) {
         .payment_system{
@@ -320,5 +468,8 @@
             font-size: 14px;
         }
     }
+
+
+
 
 </style>
