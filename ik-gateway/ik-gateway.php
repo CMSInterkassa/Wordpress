@@ -61,6 +61,9 @@ function woocommerce_init()
 
             // Payment listener/API hook
             add_action('woocommerce_api_wc_ik_sign', array($this, 'ajaxSign_generate'));
+
+            // Answer from SCI/API hook
+            add_action('woocommerce_api_wc_test', array($this, 'getAnswerFromAPI'));
   
             if (!$this->is_valid_for_use()) {
                 $this->enabled = false;
@@ -302,11 +305,30 @@ function woocommerce_init()
                 header("Cache-Control: no-cache, must-revalidate");
                 header("Expires: Thu, 01 Jan 1970 00:00:00 GMT");
                 header("Content-type: text/plain");
-             $sign = $this->IkSignFormation($_POST, $this->secret);
-              echo $sign;
+                $sign = $this->IkSignFormation($_POST, $this->secret);
+                echo $sign;
                 die();
         
         }
+
+        public function getAnswerFromAPI(){
+                if(isset($_POST[ps]))
+                {
+                    $_POST['sci[ik_int]']=$_POST[sci][ik_int];
+                    $_POST[sci]=null;
+                    $_POST['ps[phone]']=$_POST[ps][phone];
+                    $_POST[ps]=null;
+                }
+                $ch = curl_init('https://sci.interkassa.com/');
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $_POST);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                $result='';
+                $result = curl_exec($ch);
+                echo $result;
+                die();
+        }
+
 	    public function IkSignFormation($data, $secret_key)
 	    {
 	        if (!empty($data['ik_sign'])) unset($data['ik_sign']);
@@ -330,6 +352,7 @@ function woocommerce_init()
             global $interkassa;
 
 			$ajax_url = str_replace('https:', 'http:', add_query_arg('wc-api', 'WC_Ik_sign', home_url('/')));
+            $ajax_url2 = str_replace('https:', 'http:', add_query_arg('wc-api', 'WC_test', home_url('/')));
         	$image_path = plugin_dir_url('ik-gateway').'ik-gateway/paysystems/';
         	$payment_systems = $this->getIkPaymentSystems($this->merchant_id, $this->api_id, $this->api_key);
         	include 'apitpl.php';
