@@ -351,8 +351,8 @@ function woocommerce_init()
             global $woocommerce;
             global $interkassa;
 
-			$ajax_url = str_replace('https:', 'http:', add_query_arg('wc-api', 'WC_Ik_sign', home_url('/')));
-            $ajax_url2 = str_replace('https:', 'http:', add_query_arg('wc-api', 'WC_test', home_url('/')));
+			$ajax_url = add_query_arg('wc-api', 'WC_Ik_sign', home_url('/'));
+            $ajax_url2 = add_query_arg('wc-api', 'WC_test', home_url('/'));
         	$image_path = plugin_dir_url('ik-gateway').'ik-gateway/paysystems/';
         	$payment_systems = $this->getIkPaymentSystems($this->merchant_id, $this->api_id, $this->api_key);
         	include 'apitpl.php';

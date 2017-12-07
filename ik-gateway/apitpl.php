@@ -183,7 +183,8 @@
                 alert('Вы не выбрали валюту');
                 return;
             } else {
-            	if($('input[name =  "ik_pw_via"]').val()!='test_interkassa_test_xts' || $('input[name = "ik_pw_via"]').val()=="svyaznoy_wp_merchantTn_rub" || $('input[name = "ik_pw_via"]').val()=="euroset_wp_merchantTn_rub")
+				var sel_ps = $('input[name="ik_pw_via"]').val()
+            	if(sel_ps.search('test_interkassa|qiwi|rbk') == -1)
             	{
             	 	form.append(
                             $('<input>', {
