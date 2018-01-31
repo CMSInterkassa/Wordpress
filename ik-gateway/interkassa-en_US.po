@@ -26,7 +26,7 @@ msgstr "Specify currency"
 msgid "Нажмите &laquo;Оплатить&raquo;"
 msgstr "Click &laquo;Pay&raquo;"
 
-msgid "Оплатить с"
+msgid "Оплатить через"
 msgstr "Pay by"
 
 msgid "Вы не выбрали валюту"

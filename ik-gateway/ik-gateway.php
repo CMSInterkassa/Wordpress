@@ -63,7 +63,7 @@ function woocommerce_init()
             add_action('woocommerce_api_wc_ik_sign', array($this, 'ajaxSign_generate'));
 
             // Answer from SCI/API hook
-            add_action('woocommerce_api_wc_test', array($this, 'getAnswerFromAPI'));
+            add_action('woocommerce_api_wc_ik_api', array($this, 'getAnswerFromAPI'));
   
             if (!$this->is_valid_for_use()) {
                 $this->enabled = false;
@@ -190,9 +190,6 @@ function woocommerce_init()
 
             echo '<p>' . __('Спасибо за Ваш заказ, пожалуйста, нажмите кнопку ниже, чтобы заплатить.', 'interkassa') . '</p>';
             echo $this->generate_form($order);
-            if($this->enabledAPI == 'yes'){
-            	echo $this->generateAPI();
-            }   
         }
 
         public function generate_form($order_id)
@@ -202,10 +199,8 @@ function woocommerce_init()
 
             $order = new WC_Order($order_id);
             $action_adr = "https://sci.interkassa.com/";
-            $result_url = str_replace('https:', 'http:', add_query_arg('wc-api', 'wc_gateway_interkassa', home_url('/')));
 
-
-            $args = array(
+            $FormData = array(
                 'ik_am' => $order->order_total,
                 'ik_cur' => get_woocommerce_currency(),
                 'ik_co_id' => $this->merchant_id,
@@ -213,28 +208,29 @@ function woocommerce_init()
                 'ik_desc' => "#$order_id",
                 'ik_loc' => substr(get_locale(),0,2),
                 'ik_ia_u'=>add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/')),
-                'ik_suc_u'=>add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/')),
+                'ik_suc_u'=>$this->get_return_url($order),
                 'ik_fal_u'=>add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/')),
-                'ik_pnd_u'=>add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/'))
+                'ik_pnd_u'=>$this->get_return_url($order)
             );
+            if($this->test_mode)
+                $FormData['ik_pw_via'] = 'test_interkassa_test_xts';
 
-            ksort($args, SORT_STRING);
-            $args['secret'] = $this->secret;
-            $signString = implode(':', $args);
-            $signature = base64_encode(md5($signString, true));
 
-            unset($args["secret"]);
-            $args["ik_sign"] = $signature;
-            $args_array = array();
-            foreach ($args as $key => $value) {
-                $args_array[] = '<input type="hidden" name="' . esc_attr($key) . '" value="' . esc_attr($value) . '" />';
+            $FormData["ik_sign"] = $this->IkSignFormation($FormData, $this->secret);
+            $hidden_fields = '';
+            foreach ($FormData as $key => $value) {
+                $hidden_fields.= '<input type="hidden" name="' . esc_attr($key) . '" value="' . esc_attr($value) . '" />';
             }
 
-            return
-                '<form accept-charset="windows-1251" action="' . esc_url($action_adr) . '" method="POST" name="interkassa_form">' .
-                '<input type="submit" class="button alt" id="submit_interkassa_button" value="' . __('Оплатить', 'interkassa') . '" /> <a class="button cancel" href="' . $order->get_cancel_order_url() . '">' . __('Отказаться от оплаты & вернуться в корзину', 'interkassa') . '</a>' . "\n" .
-                implode("\n", $args_array) .
-                '</form>';
+            $cancel_url = '<a class="button cancel" href="'
+                . $order->get_cancel_order_url() .
+                '">' . __('Отказаться от оплаты & вернуться в корзину', 'interkassa') . '</a>';
+
+            $ajax_url = add_query_arg('wc-api', 'wc_ik_sign', home_url('/'));
+            $plugin_path = plugin_dir_url('ik-gateway').'ik-gateway/';
+            $image_path = plugin_dir_url('ik-gateway').'ik-gateway/images/';
+
+            include 'tpl.php';
         }
 
         public function check_ipn_response()
@@ -282,7 +278,7 @@ function woocommerce_init()
                     }
 
                     $woocommerce->cart->empty_cart();
-                    wp_redirect(get_permalink(woocommerce_get_page_id('thanks')));
+                    wp_redirect($this->get_return_url($order));
                     exit();
                 } else {
                     $order = new WC_Order($_REQUEST['ik_pm_no']);
@@ -301,32 +297,37 @@ function woocommerce_init()
         }
 
         public function ajaxSign_generate(){
-                header("Pragma: no-cache");
-                header("Cache-Control: no-cache, must-revalidate");
-                header("Expires: Thu, 01 Jan 1970 00:00:00 GMT");
-                header("Content-type: text/plain");
-                $sign = $this->IkSignFormation($_POST, $this->secret);
-                echo $sign;
-                die();
-        
+            header("Pragma: no-cache");
+            header("Cache-Control: no-cache, must-revalidate");
+            header("Expires: Thu, 01 Jan 1970 00:00:00 GMT");
+            header("Content-type: text/plain");
+
+            if (isset($_POST['ik_act']) && $_POST['ik_act'] == 'process'){
+                $data = $this->getAnswerFromAPI($_POST);
+                $request['ik_sign'] = $this->IkSignFormation($_POST, $this -> secret);
+            }
+            else
+                $data = $this->IkSignFormation($_POST, $this->secret);
+
+            echo $data;
+            exit;
         }
 
         public function getAnswerFromAPI(){
-                if(isset($_POST[ps]))
-                {
-                    $_POST['sci[ik_int]']=$_POST[sci][ik_int];
-                    $_POST[sci]=null;
-                    $_POST['ps[phone]']=$_POST[ps][phone];
-                    $_POST[ps]=null;
-                }
-                $ch = curl_init('https://sci.interkassa.com/');
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $_POST);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                $result='';
-                $result = curl_exec($ch);
-                echo $result;
-                die();
+            if(isset($_POST[ps]))
+            {
+                $_POST['sci[ik_int]']=$_POST[sci][ik_int];
+                $_POST[sci]=null;
+                $_POST['ps[phone]']=$_POST[ps][phone];
+                $_POST[ps]=null;
+            }
+            $ch = curl_init('https://sci.interkassa.com/');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $_POST);
+            $result = curl_exec($ch);
+            echo $result;
+            exit;
         }
 
 	    public function IkSignFormation($data, $secret_key)
@@ -347,55 +348,45 @@ function woocommerce_init()
 	        return $ik_sign;
 	    }
 
-        public function generateAPI(){
-            global $woocommerce;
-            global $interkassa;
+        public function getIkPaymentSystems($ik_co_id, $ik_api_id, $ik_api_key)
+        {
+            $username = $ik_api_id;
+            $password = $ik_api_key;
+            $remote_url = 'https://api.interkassa.com/v1/paysystem-input-payway?checkoutId=' . $ik_co_id;
 
-			$ajax_url = add_query_arg('wc-api', 'WC_Ik_sign', home_url('/'));
-            $ajax_url2 = add_query_arg('wc-api', 'WC_test', home_url('/'));
-        	$image_path = plugin_dir_url('ik-gateway').'ik-gateway/paysystems/';
-        	$payment_systems = $this->getIkPaymentSystems($this->merchant_id, $this->api_id, $this->api_key);
-        	include 'apitpl.php';
-        }
-        public function getIkPaymentSystems($ik_co_id, $ik_api_id, $ik_api_key){
-        $username = $ik_api_id;
-        $password = $ik_api_key;
-        $remote_url = 'https://api.interkassa.com/v1/paysystem-input-payway?checkoutId=' . $ik_co_id;
+            // Create a stream
+            $opts = array(
+                'http' => array(
+                    'method' => "GET",
+                    'header' => "Authorization: Basic " . base64_encode("$username:$password")
+                )
+            );
 
-        // Create a stream
-        $opts = array(
-            'http' => array(
-                'method' => "GET",
-                'header' => "Authorization: Basic " . base64_encode("$username:$password")
-            )
-        );
+            $context = stream_context_create($opts);
+            $file = file_get_contents($remote_url, false, $context);
+            $json_data = json_decode($file);
 
-        $context = stream_context_create($opts);
-        $file = file_get_contents($remote_url, false, $context);
-        $json_data = json_decode($file);
+            if ($json_data->status != 'error') {
+                $payment_systems = array();
+                foreach ($json_data->data as $ps => $info) {
+                    $payment_system = $info->ser;
+                    if (!array_key_exists($payment_system, $payment_systems)) {
+                        $payment_systems[$payment_system] = array();
+                        foreach ($info->name as $name) {
+                            if ($name->l == 'en') {
+                                $payment_systems[$payment_system]['title'] = ucfirst($name->v);
+                            }
+                            $payment_systems[$payment_system]['name'][$name->l] = $name->v;
 
-        if($json_data->status != 'error'){
-        $payment_systems = array();
-        foreach ($json_data->data as $ps => $info) {
-            $payment_system = $info->ser;
-            if (!array_key_exists($payment_system, $payment_systems)) {
-                $payment_systems[$payment_system] = array();
-                foreach ($info->name as $name) {
-                    if ($name->l == 'en') {
-                        $payment_systems[$payment_system]['title'] = ucfirst($name->v);
+                        }
                     }
-                    $payment_systems[$payment_system]['name'][$name->l] = $name->v;
+                    $payment_systems[$payment_system]['currency'][strtoupper($info->curAls)] = $info->als;
 
                 }
-            }
-            $payment_systems[$payment_system]['currency'][strtoupper($info->curAls)] = $info->als;
-
+                return $payment_systems;
+            } else
+                return '<strong style="color:red;">API connection error!<br>' . $json_data->message . '</strong>';
         }
-        return $payment_systems;
-        }else{
-            echo '<strong style="color:red;">API connection error!<br>'.$json_data->message.'</strong>';
-        }
-    }
 
     }
 
