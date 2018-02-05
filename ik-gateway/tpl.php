@@ -44,7 +44,7 @@ if($this->enabledAPI == 'yes') {
                                                     <?php foreach ($info['currency'] as $currency => $currencyAlias) { ?>
                                                         <a class="btn btn-primary btn-sm notActive"
                                                            data-toggle="fun"
-                                                           data-title="<?php $currencyAlias ?>"><?php echo $currency; ?></a>
+                                                           data-title="<?php echo $currencyAlias; ?>"><?php echo $currency; ?></a>
                                                     <?php } ?>
                                                 </div>
                                             </div>
