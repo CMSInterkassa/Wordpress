@@ -368,24 +368,31 @@ function woocommerce_init()
 
             if ($json_data->status != 'error') {
                 $payment_systems = array();
-                foreach ($json_data->data as $ps => $info) {
-                    $payment_system = $info->ser;
-                    if (!array_key_exists($payment_system, $payment_systems)) {
-                        $payment_systems[$payment_system] = array();
-                        foreach ($info->name as $name) {
-                            if ($name->l == 'en') {
-                                $payment_systems[$payment_system]['title'] = ucfirst($name->v);
-                            }
-                            $payment_systems[$payment_system]['name'][$name->l] = $name->v;
+				if(!empty($json_data->data)){	
+					foreach ($json_data->data as $ps => $info) {
+						$payment_system = $info->ser;
+						if (!array_key_exists($payment_system, $payment_systems)) {
+							$payment_systems[$payment_system] = array();
+							foreach ($info->name as $name) {
+								if ($name->l == 'en') {
+									$payment_systems[$payment_system]['title'] = ucfirst($name->v);
+								}
+								$payment_systems[$payment_system]['name'][$name->l] = $name->v;
 
-                        }
-                    }
-                    $payment_systems[$payment_system]['currency'][strtoupper($info->curAls)] = $info->als;
-
-                }
-                return $payment_systems;
-            } else
-                return '<strong style="color:red;">API connection error!<br>' . $json_data->message . '</strong>';
+							}
+						}
+						$payment_systems[$payment_system]['currency'][strtoupper($info->curAls)] = $info->als;
+					}
+				}
+				
+                return !empty($payment_systems)? $payment_systems : '<strong style="color:red;">API connection error or system response empty!</strong>';
+            } else {
+                if(!empty($json_data->message))
+					return '<strong style="color:red;">API connection error!<br>' . $json_data->message . '</strong>';
+				else
+					return '<strong style="color:red;">API connection error or system response empty!</strong>';
+			}
+			
         }
 
     }

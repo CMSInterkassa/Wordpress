@@ -9,15 +9,15 @@
     <?php echo $cancel_url;?>
 </form>
 
-<button  id="InterkassaModalButton" class="sel-ps-ik btn btn-info btn-lg" data-toggle="modal" data-target="#InterkassaModal" style="display: none;">
-    Select Payment Method
-</button>
 <div class="interkasssa" style="text-align: center;">
 <?php
 if($this->enabledAPI == 'yes') {
     $payment_systems = $this->getIkPaymentSystems($this->merchant_id, $this->api_id, $this->api_key);
     if (is_array($payment_systems) && !empty($payment_systems)) {
         ?>
+		<button  id="InterkassaModalButton" class="sel-ps-ik btn btn-info btn-lg" data-toggle="modal" data-target="#InterkassaModal" style="display: none;">
+			Select Payment Method
+		</button>
         <div id="InterkassaModal" class="modal fade" role="dialog">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content" id="plans">
@@ -27,7 +27,6 @@ if($this->enabledAPI == 'yes') {
                             2. <?php _e('Укажите валюту', 'interkassa'); ?><br>
                             3. <?php _e('Нажмите &laquo;Оплатить&raquo;', 'interkassa'); ?><br>
                         </h3>
-
                         <div class="row">
                             <?php foreach ($payment_systems as $ps => $info) { ?>
                                 <div class="col-sm-3 text-center payment_system">
@@ -65,7 +64,8 @@ if($this->enabledAPI == 'yes') {
             </div>
         </div>
         <?php
-    } else
+    } 
+	else
         echo $payment_systems;
 }
 ?>
