@@ -1,12 +1,11 @@
 <?php
 /*
 Plugin Name: InterKassa Gateway
-Plugin URI: http://www.gateon.net
 Description: Платежный шлюз "Интеркасса" для сайтов на WordPress. (версия Интеркассы 2.0)
-Version: 1.4
-Lat Update: 5.03.2017
-Author: Gateon
-Author URI: http://www.gateon.net
+Version: 1.5
+Last Update: 24.04.2018
+Author: Interkassa
+Author URI: http://www.interkassa.com
 */
 if (!defined('ABSPATH')) exit;
 
@@ -17,7 +16,6 @@ load_plugin_textdomain( 'interkassa', '/wp-content/plugins/'. $plugin_dir , $plu
 
 function woocommerce_init()
 {
-
     if (!class_exists('WC_Payment_Gateway')) return;
 
     class WC_Gateway_Interkassa extends WC_Payment_Gateway
@@ -35,7 +33,7 @@ function woocommerce_init()
             $this->init_form_fields();
             $this->init_settings();
             $this->title = $this->get_option('title');
-            $this->test_mode = $this->get_option('test_mode');
+            $this->test_mode = ($this->get_option('test_mode') == 'yes')? 1 : 0;
             $this->test_key = $this->get_option('test_key');
             $this->description = $this->get_option('description');
             $this->merchant_id = $this->get_option('merchant_id');
@@ -292,8 +290,6 @@ function woocommerce_init()
                 exit;
 
             }
-
-
         }
 
         public function ajaxSign_generate(){
@@ -348,11 +344,11 @@ function woocommerce_init()
 	        return $ik_sign;
 	    }
 
-        public function getIkPaymentSystems($ik_co_id, $ik_api_id, $ik_api_key)
+        public function getIkPaymentSystems($ik_cashbox_id, $ik_api_id, $ik_api_key)
         {
             $username = $ik_api_id;
             $password = $ik_api_key;
-            $remote_url = 'https://api.interkassa.com/v1/paysystem-input-payway?checkoutId=' . $ik_co_id;
+            $remote_url = 'https://api.interkassa.com/v1/paysystem-input-payway?checkoutId=' . $ik_cashbox_id;
 
             // Create a stream
             $opts = array(
@@ -363,12 +359,15 @@ function woocommerce_init()
             );
 
             $context = stream_context_create($opts);
-            $file = file_get_contents($remote_url, false, $context);
-            $json_data = json_decode($file);
+            $response = file_get_contents($remote_url, false, $context);
+            $json_data = json_decode($response);			
+			
+			if(empty($response))
+				return '<strong style="color:red;">Error!!! System response empty!</strong>';			
 
             if ($json_data->status != 'error') {
                 $payment_systems = array();
-				if(!empty($json_data->data)){	
+				if(!empty($json_data->data)){
 					foreach ($json_data->data as $ps => $info) {
 						$payment_system = $info->ser;
 						if (!array_key_exists($payment_system, $payment_systems)) {
@@ -378,7 +377,6 @@ function woocommerce_init()
 									$payment_systems[$payment_system]['title'] = ucfirst($name->v);
 								}
 								$payment_systems[$payment_system]['name'][$name->l] = $name->v;
-
 							}
 						}
 						$payment_systems[$payment_system]['currency'][strtoupper($info->curAls)] = $info->als;
@@ -391,12 +389,10 @@ function woocommerce_init()
 					return '<strong style="color:red;">API connection error!<br>' . $json_data->message . '</strong>';
 				else
 					return '<strong style="color:red;">API connection error or system response empty!</strong>';
-			}
-			
+			}			
         }
 
     }
-
 
     function woocommerce_add_interkassa_gateway($methods)
     {
@@ -405,6 +401,5 @@ function woocommerce_init()
     }
 
     add_filter('woocommerce_payment_gateways', 'woocommerce_add_interkassa_gateway');
-
 }
 ?>

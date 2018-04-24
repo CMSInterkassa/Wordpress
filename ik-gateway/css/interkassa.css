@@ -45,39 +45,28 @@
     100% { transform: rotate(360deg); }
 }
 
-
 #InterkassaModal .panel-footer{
     text-align: center;
 }
 #InterkassaModal .btn-lg{
     margin-top: 5px;
 }
+
 .ik-payment-confirmation{
-    font-size: 16px;
-}
-#ik_button{
-    background: #27ae60;
-    border-top: 2px solid #27ae60;
-    border-bottom: 2px solid #1f9952;
-    border-left: none;
-    border-right: none;
-    font-family: "Segoe UI",Arial,Helvetica,sans-serif;
-    font-size: 14px;
+    margin-top: 10px;
+    background: #4CB16D;
+    padding: 5px 5px;
+    transition: 0.2s;
     color: #fff;
-    font-weight: 700;
-    outline: 0;
-    text-shadow: none;
-    padding: 4px 15px;
-    margin: 20px 0;
-    box-shadow: none;
+    font-weight: 500;
+    font-size: 16px;
+    width: 100%;
 }
-#ik_button:hover{
-    background-color: #57d68d;
-    border-top-color: #57d68d;
-    border-bottom-color: #27ae60;
+.ik-payment-confirmation:hover{
+    transform: scale(1.02);
 }
 
-#InterkassaModal .input-group,#InterkassaModal h1{
+#InterkassaModal .input-group,#InterkassaModal h3{
     text-align: center;
 }
 
@@ -105,6 +94,7 @@
 
 .payment_system .btn-primary, .payment_system .btn-secondary, .payment_system .btn-tertiary {
     padding: 8px;
+	font-size:10px;
 }
 .panel-image{
     height: 150px;
@@ -595,5 +585,34 @@ fieldset[disabled] a.btn {
     .row {
         margin-right: -15px;
         margin-left: -15px;
+    }
+}
+
+@media only screen and (min-width:768px) and (max-width:1200px) {
+    .payment_system{
+        width: 32%;
+    }
+}
+
+@media only screen and (min-width:480px) and (max-width:768px) {
+    .payment_system{
+        width: 48%;
+    }
+    .ik-payment-confirmation{
+        font-size: 14px;
+    }
+    #radioBtn a{
+        font-size: 14px;
+    }
+}
+@media only screen and (max-width:480px) {
+    .payment_system{
+        width: 100%;
+    }
+    .ik-payment-confirmation{
+        font-size: 14px;
+    }
+    #radioBtn a{
+        font-size: 14px;
     }
 }
