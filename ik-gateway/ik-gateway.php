@@ -297,30 +297,24 @@ function woocommerce_init()
             header("Cache-Control: no-cache, must-revalidate");
             header("Expires: Thu, 01 Jan 1970 00:00:00 GMT");
             header("Content-type: text/plain");
+			$request = $_POST;
 
             if (isset($_POST['ik_act']) && $_POST['ik_act'] == 'process'){
-                $data = $this->getAnswerFromAPI($_POST);
-                $request['ik_sign'] = $this->IkSignFormation($_POST, $this -> secret);
+                $request['ik_sign'] = $this->IkSignFormation($request, $this -> secret);
+                $data = $this->getAnswerFromAPI($request);
             }
             else
-                $data = $this->IkSignFormation($_POST, $this->secret);
+                $data = $this->IkSignFormation($request, $this->secret);
 
             echo $data;
             exit;
         }
 
-        public function getAnswerFromAPI(){
-            if(isset($_POST[ps]))
-            {
-                $_POST['sci[ik_int]']=$_POST[sci][ik_int];
-                $_POST[sci]=null;
-                $_POST['ps[phone]']=$_POST[ps][phone];
-                $_POST[ps]=null;
-            }
+        public function getAnswerFromAPI($data){
             $ch = curl_init('https://sci.interkassa.com/');
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $_POST);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
             $result = curl_exec($ch);
             echo $result;
             exit;
