@@ -90,7 +90,7 @@ function woocommerce_init()
 
             <?php } else { ?>
             <div class="inline error"><p>
-                    <strong><?php __('Шлюз отключен', 'interkassa'); ?></strong>: <?php __('Единая Касса не поддерживает валюты Вашего магазина.', 'woocommerce'); ?>
+                    <strong><?php _e('Шлюз отключен', 'interkassa'); ?></strong>: <?php _e('Единая Касса не поддерживает валюты Вашего магазина.', 'woocommerce'); ?>
                 </p></div>
             <?php
             }
