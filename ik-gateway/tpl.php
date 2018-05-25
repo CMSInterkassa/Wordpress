@@ -71,22 +71,29 @@ if($this->enabledAPI == 'yes') {
 ?>
 </div>
 <script type="text/javascript">
-
+	if($ == 'undefined'){
+		if(jQuery == 'undefined'){
+			alert('Your jQuery is not defined in your site')
+		} else {
+			$ = jQuery	
+		}
+	}
+	
     var selpayIK = {
         actForm: 'https://sci.interkassa.com/',
         req_url: '<?php echo $ajax_url;?>',
         selPaysys: function () {
-            if($('button.sel-ps-ik').length > 0)
-                $('.sel-ps-ik').click()
-            else{
-                var form = $('form[name="payment_interkassa"]')
-                form[0].action = selpayIK.actForm
-                setTimeout(function(){form[0].submit()},200)
+			if(document.querySelector('button.sel-ps-ik') != null){
+                document.querySelector('.sel-ps-ik').click();			    
+            } else {
+                var form = document.forms['payment_interkassa'];
+                form.action = selpayIK.actForm;
+                setTimeout(function(){form.submit()},200)
             }
         },
         paystart : function (data) {
-            data_array = (this.IsJsonString(data))? JSON.parse(data) : data
-            console.log(data_array);
+            data_array = (this.IsJsonString(data))? JSON.parse(data) : data;
+            /* console.log(data_array); */
             var form = $('form[name="payment_interkassa"]');
             if (data_array['resultCode'] != 0) {
                 $('input[name="ik_act"]').remove();
@@ -134,7 +141,7 @@ if($this->enabledAPI == 'yes') {
         },
         paystart2 : function (string) {
             data_array = (this.IsJsonString(data))? JSON.parse(data) : data;
-            console.log(data_array);
+            /* console.log(data_array); */
             var form2 = $('#internalForm');
             if (data_array['resultCode'] != 0) {
                 form2[0].action = selpayIK.actForm;
@@ -176,7 +183,7 @@ if($this->enabledAPI == 'yes') {
 
     $(document).ready(function () {
         $('body').prepend('<div class="blLoaderIK"><div class="loaderIK"></div></div>');
-        var checkSelCurrPS = []
+        var checkSelCurrPS = [];
 
         $('.ik-payment-confirmation').click(function (e) {
             e.preventDefault();
@@ -184,7 +191,7 @@ if($this->enabledAPI == 'yes') {
             var pm = $(this).closest('.payment_system');
             var ik_pw_via = $(pm).find('.radioBtn a.active').data('title')
             if (!$(pm).find('.radioBtn a').hasClass('active') || ($.inArray(ik_pw_via, checkSelCurrPS) == -1)) {
-                alert('Вы не выбрали валюту');
+                alert('<?php _e('Вы не выбрали валюту', 'interkassa');?>');
                 return;
             } else {
                 if (ik_pw_via.search('test_interkassa|qiwi|rbk') == -1) {
