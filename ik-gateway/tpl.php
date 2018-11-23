@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" crossorigin="anonymous">
+<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" crossorigin="anonymous">-->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="<?php echo $plugin_path;?>css/interkassa.css">
@@ -15,19 +15,19 @@ if($this->enabledAPI == 'yes') {
     $payment_systems = $this->getIkPaymentSystems($this->merchant_id, $this->api_id, $this->api_key);
     if (is_array($payment_systems) && !empty($payment_systems)) {
         ?>
-		<button  id="InterkassaModalButton" class="sel-ps-ik btn btn-info btn-lg" data-toggle="modal" data-target="#InterkassaModal" style="display: none;">
-			Select Payment Method
-		</button>
-        <div id="InterkassaModal" class="modal fade" role="dialog">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content" id="plans">
+        <button type="button" class="sel-ps-ik btn btn-info btn-lg" data-toggle="modal" data-target="#InterkassaModal" style="display: none;">
+            Select Payment Method
+        </button>
+        <div id="InterkassaModal" class="ik-modal fade" role="dialog">
+            <div class="ik-modal-dialog ik-modal-lg">
+                <div class="ik-modal-content" id="plans">
                     <div class="container">
                         <h3>
                             1. <?php _e('Выберите удобный способ оплаты', 'interkassa'); ?><br>
                             2. <?php _e('Укажите валюту', 'interkassa'); ?><br>
                             3. <?php _e('Нажмите &laquo;Оплатить&raquo;', 'interkassa'); ?><br>
                         </h3>
-                        <div class="row">
+                        <div class="ik-row">
                             <?php foreach ($payment_systems as $ps => $info) { ?>
                                 <div class="col-sm-3 text-center payment_system">
                                     <div class="panel panel-warning panel-pricing">
@@ -77,7 +77,7 @@ if($this->enabledAPI == 'yes') {
 		} else {
 			$ = jQuery	
 		}
-	}
+	};
 	
     var selpayIK = {
         actForm: 'https://sci.interkassa.com/',
@@ -93,7 +93,6 @@ if($this->enabledAPI == 'yes') {
         },
         paystart : function (data) {
             data_array = (this.IsJsonString(data))? JSON.parse(data) : data;
-            /* console.log(data_array); */
             var form = $('form[name="payment_interkassa"]');
             if (data_array['resultCode'] != 0) {
                 $('input[name="ik_act"]').remove();
@@ -116,10 +115,11 @@ if($this->enabledAPI == 'yes') {
                     $('#tempformIK').submit();
                 }
                 else {
-                    if (document.getElementById('tempdivIK') == null)
+                    if (document.getElementById('tempdivIK') == null){
                         $('form[name="payment_interkassa"]').after('<div id="tempdivIK">' + data_array['resultData']['internalForm'] + '</div>');
-                    else
+					}else{
                         $('#tempdivIK').html(data_array['resultData']['internalForm']);
+					}
                     $('#internalForm').attr('action', 'javascript:selpayIK.selPaysys2()')
                 }
             }
@@ -141,7 +141,6 @@ if($this->enabledAPI == 'yes') {
         },
         paystart2 : function (string) {
             data_array = (this.IsJsonString(data))? JSON.parse(data) : data;
-            /* console.log(data_array); */
             var form2 = $('#internalForm');
             if (data_array['resultCode'] != 0) {
                 form2[0].action = selpayIK.actForm;
@@ -179,7 +178,7 @@ if($this->enabledAPI == 'yes') {
             }
             return true;
         }
-    }
+    };
 
     $(document).ready(function () {
         $('body').prepend('<div class="blLoaderIK"><div class="loaderIK"></div></div>');
@@ -189,25 +188,15 @@ if($this->enabledAPI == 'yes') {
             e.preventDefault();
 
             var pm = $(this).closest('.payment_system');
-            var ik_pw_via = $(pm).find('.radioBtn a.active').data('title')
+            var ik_pw_via = $(pm).find('.radioBtn a.active').data('title');
             if (!$(pm).find('.radioBtn a').hasClass('active') || ($.inArray(ik_pw_via, checkSelCurrPS) == -1)) {
                 alert('<?php _e('Вы не выбрали валюту', 'interkassa');?>');
                 return;
             } else {
                 if (ik_pw_via.search('test_interkassa|qiwi|rbk') == -1) {
                     var form = $('form[name="payment_interkassa"]');
-                    form.append(
-                        $('<input>', {
-                            type: 'hidden',
-                            name: 'ik_act',
-                            val: 'process'
-                        }));
-                    form.append(
-                        $('<input>', {
-                            type: 'hidden',
-                            name: 'ik_int',
-                            val: 'json'
-                        }));
+                    form.append($('<input>', {type:'hidden', name:'ik_act', val:'process'}));
+                    form.append($('<input>', {type: 'hidden', name: 'ik_int', val: 'json'}));
                     $('.blLoaderIK').css('display', 'block');
                     $.post(selpayIK.req_url, form.serialize(), function (data) {
                             selpayIK.paystart(data);
@@ -223,7 +212,7 @@ if($this->enabledAPI == 'yes') {
                     $('form[name="payment_interkassa"]').attr('action', selpayIK.actForm).submit()
                 }
             }
-            $('#InterkassaModal').hide()
+            $('#InterkassaModal').hide();
             $('.fade.in').hide()
         });
 
@@ -233,18 +222,17 @@ if($this->enabledAPI == 'yes') {
             var sel = $(this).data('title');
             var tog = $(this).data('toggle');
 
-            console.log(tog)
-
             $('#' + tog).prop('value', sel);
             $('a[data-toggle="' + tog + '"]').not('[data-title="' + sel + '"]').removeClass('active').addClass('notActive');
             $('a[data-toggle="' + tog + '"][data-title="' + sel + '"]').removeClass('notActive').addClass('active');
 
             var ik_pw_via = $(this).attr('data-title');
-            checkSelCurrPS.push(ik_pw_via)
-            if ($('input[name ="ik_pw_via"]').length > 0)
+            checkSelCurrPS.push(ik_pw_via);
+            if ($('input[name ="ik_pw_via"]').length > 0){
                 $('input[name ="ik_pw_via"]').val(ik_pw_via);
-            else
+			}else{
                 form.append($('<input>', {type: 'hidden', name: 'ik_pw_via', val: ik_pw_via}));
+			}
 
             $.post(selpayIK.req_url, form.serialize())
                 .always(function (data, status) {
@@ -252,8 +240,9 @@ if($this->enabledAPI == 'yes') {
                     if(status == 'success'){
                         $('input[name="ik_sign"]').val(data);
                     }
-                    else
+                    else{
                         alert('Something wrong');
+					}
                 })
         })
     });
