@@ -41,8 +41,8 @@ msgstr "Interkassa"
 msgid "Шлюз отключен"
 msgstr "Gateway is disabled"
 
-msgid "Вкл. / Выкл."
-msgstr "On / Of"
+msgid "Вкл. / Выкл"
+msgstr "On / Off"
 
 msgid "Включить"
 msgstr "On"
@@ -104,5 +104,5 @@ msgstr "The payment was successfully paid through the Interkassa"
 msgid "Платеж не оплачен"
 msgstr "Payment not paid"
 
-msgid "Отказаться от оплаты & вернуться в корзину"
+msgid "Отказаться от оплаты и вернуться в корзину"
 msgstr "Refuse to pay & return to shopping cart"

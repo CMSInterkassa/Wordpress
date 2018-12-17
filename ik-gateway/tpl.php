@@ -5,7 +5,7 @@
 
 <form name="payment_interkassa" id="InterkassaForm" action="javascript:selpayIK.selPaysys()" method="POST" class="">
     <?php echo $hidden_fields;?>
-    <input type="submit" value="<?php echo __('Оплатить', 'interkassa');?>">
+    <input type="submit" value="<?php _e('Оплатить', 'interkassa');?>">
     <?php echo $cancel_url;?>
 </form>
 

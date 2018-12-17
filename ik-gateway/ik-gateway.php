@@ -2,17 +2,14 @@
 /*
 Plugin Name: InterKassa Gateway
 Description: Платежный шлюз "Интеркасса" для сайтов на WordPress. (версия Интеркассы 2.0)
-Version: 1.7
-Last Update: 03.12.2018
+Version: 1.8
+Last Update: 17.12.2018
 Author: Interkassa
 Author URI: http://www.interkassa.com
 */
 if (!defined('ABSPATH')) exit;
 
 add_action('plugins_loaded', 'woocommerce_init', 0);
-
-$plugin_dir = basename(dirname(__FILE__));
-load_plugin_textdomain( 'interkassa', '/wp-content/plugins/'. $plugin_dir , $plugin_dir );
 
 function woocommerce_init()
 {
@@ -22,10 +19,13 @@ function woocommerce_init()
     {
         public function __construct()
         {
-
             global $woocommerce;
-            global $interkassa;
-
+			
+			$plugin_dir = basename(dirname(__FILE__));
+			// $pathLang = WP_PLUGIN_DIR .'/'. $plugin_dir . '/'. get_locale() .'.mo';
+			// load_textdomain( 'interkassa' , $pathLang );
+			load_plugin_textdomain('interkassa', false, $plugin_dir);
+			
             $this->id = 'interkassa';
             $this->has_fields = false;
             $this->method_title = __('Интеркасса 2.0', 'interkassa');
@@ -71,13 +71,9 @@ function woocommerce_init()
             }
         }
 
-
-
         public function admin_options()
         {
             global $woocommerce;
-            global $interkassa;
-
 
             ?>
             <h3><?php _e('Интеркасса 2.0', 'interkassa'); ?></h3>
@@ -102,7 +98,6 @@ function woocommerce_init()
         public function init_form_fields()
         {
             global $woocommerce;
-            global $interkassa;
 
             $this->form_fields = array(
                 'enabled' => array(
@@ -167,7 +162,6 @@ function woocommerce_init()
 
         function is_valid_for_use()
         {
-
             if (!in_array(get_option('woocommerce_currency'), array('RUB', 'UAH', 'USD', 'EUR'))) {
                 return false;
             }
@@ -187,8 +181,6 @@ function woocommerce_init()
 
         public function receipt_page($order)
         {
-            global $interkassa;
-
             echo '<p>' . __('Спасибо за Ваш заказ, пожалуйста, нажмите кнопку ниже, чтобы заплатить.', 'interkassa') . '</p>';
             echo $this->generate_form($order);
         }
@@ -196,7 +188,6 @@ function woocommerce_init()
         public function generate_form($order_id)
         {
             global $woocommerce;
-            global $interkassa;
 
             $order = new WC_Order($order_id);
             $action_adr = "https://sci.interkassa.com/";
@@ -236,9 +227,7 @@ function woocommerce_init()
 
         public function check_ipn_response()
         {
-
             global $woocommerce;
-            global $interkassa;
 
             if ($_POST['ik_co_id']) {
 
@@ -295,7 +284,8 @@ function woocommerce_init()
             }
         }
 
-        public function ajaxSign_generate(){
+        public function ajaxSign_generate()
+		{
             header("Pragma: no-cache");
             header("Cache-Control: no-cache, must-revalidate");
             header("Expires: Thu, 01 Jan 1970 00:00:00 GMT");
@@ -313,7 +303,8 @@ function woocommerce_init()
             exit;
         }
 
-        public function getAnswerFromAPI($data){
+        public function getAnswerFromAPI($data)
+		{
             $ch = curl_init('https://sci.interkassa.com/');
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
@@ -399,4 +390,3 @@ function woocommerce_init()
 
     add_filter('woocommerce_payment_gateways', 'woocommerce_add_interkassa_gateway');
 }
-?>
