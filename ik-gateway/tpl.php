@@ -1,5 +1,5 @@
 <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" crossorigin="anonymous">-->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>-->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="<?php echo $plugin_path;?>css/interkassa.css">
 
@@ -71,11 +71,11 @@ if($this->enabledAPI == 'yes') {
 ?>
 </div>
 <script type="text/javascript">
-	if($ == 'undefined'){
-		if(jQuery == 'undefined'){
+	if($ == undefined){
+		if(jQuery == undefined){
 			alert('Your jQuery is not defined in your site')
 		} else {
-			$ = jQuery	
+			$ = jQuery
 		}
 	};
 	

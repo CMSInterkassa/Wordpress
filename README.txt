@@ -1,9 +1,7 @@
-Plugin: InterKassa Gateway
+﻿Plugin: InterKassa Gateway
 Description: Payment gateway "Intercassa" for sites on WordPress. (Version of Intercasse 2.0)
 Purpose: The module adds a payment method "Intercass" for the plugin WooCommerce 2.5.5+, Engine 4.5.X version
-Version: 1.5
-Author: Gateon
-Site: http://www.gateon.net
+Version: 1.8.1
 
 #Install
 1. Make sure the versions of the module and your CMS match, they must match.
@@ -41,9 +39,7 @@ This will help you configure all the necessary settings and make sure your syste
 Плагин: InterKassa Gateway
 Описание: Платежный шлюз "Интеркасса" для сайтов на WordPress. (версия Интеркассы 2.0)
 Предназначение: Модуль добавляет способ оплаты "Интеркасса" для плагина WooCommerce 2.5.5+, Версия движка 4.5.X
-Версия: 1.5
-Автор: Gateon
-Сайт автора: http://www.gateon.net
+Версия: 1.8.1
 
 #Установка
 1. Убедитесь в соответствии версий модуля и вашей CMS, они должны совпадать.
