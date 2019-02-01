@@ -1,6 +1,6 @@
 <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" crossorigin="anonymous">-->
-<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>-->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" crossorigin="anonymous"></script>
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" crossorigin="anonymous"></script>-->
 <link rel="stylesheet" href="<?php echo $plugin_path;?>css/interkassa.css">
 
 <form name="payment_interkassa" id="InterkassaForm" action="javascript:selpayIK.selPaysys()" method="POST" class="">
@@ -182,6 +182,12 @@ if($this->enabledAPI == 'yes') {
 
     $(document).ready(function () {
         $('body').prepend('<div class="blLoaderIK"><div class="loaderIK"></div></div>');
+		if(typeof $.fn.modal == 'undefined'){
+			var s = document.createElement("script");
+			s.src = "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js";
+			$("head").append(s);
+		}
+		
         var checkSelCurrPS = [];
 
         $('.ik-payment-confirmation').click(function (e) {

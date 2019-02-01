@@ -2,8 +2,8 @@
 /*
 Plugin Name: InterKassa Gateway
 Description: Платежный шлюз "Интеркасса" для сайтов на WordPress. (версия Интеркассы 2.0)
-Version: 1.8.1
-Last Update: 21.12.2018
+Version: 1.8.2
+Last Update: 1.02.2019
 Author: Interkassa
 Author URI: http://www.interkassa.com
 */
@@ -174,7 +174,7 @@ function ik_init()
             $order = new WC_Order($order_id);
             return array(
                 'result' => 'success',
-                'redirect' => add_query_arg('order', $order->id, add_query_arg('key', $order->order_key, get_permalink(woocommerce_get_page_id('pay'))))
+                'redirect' => $order->get_checkout_payment_url(1)
             );
 
         }
@@ -201,7 +201,7 @@ function ik_init()
                 'ik_loc' => substr(get_locale(),0,2),
                 'ik_ia_u'=>add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/')),
                 'ik_suc_u'=>$this->get_return_url($order),
-                'ik_fal_u'=>add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/')),
+                'ik_fal_u'=>$order->get_cancel_order_url(),
                 'ik_pnd_u'=>$this->get_return_url($order)
             );
             if($this->test_mode)
@@ -261,19 +261,18 @@ function ik_init()
 
                     if ($data['ik_inv_st'] == 'success') {
                         $order->payment_complete();
-                        $order->add_order_note(_e('Платеж успешно оплачен через Интеркассу', 'interkassa'));
+                        $order->add_order_note(__('Платеж успешно оплачен через Интеркассу', 'interkassa'));
                     } else if ($data['ik_inv_st'] == 'fail') {
-                        $order->update_status('failed', _e('Платеж не оплачен', 'interkassa'));
-                        $order->add_order_note(_e('Платеж не оплачен', 'interkassa'));
+                        $order->update_status('failed', __('Платеж не оплачен', 'interkassa'));
+                        $order->add_order_note(__('Платеж не оплачен', 'interkassa'));
                     }
 
-                    $woocommerce->cart->empty_cart();
-                    wp_redirect($this->get_return_url($order));
-                    exit();
+                    wp_redirect($order->get_return_url($order));
+                    exit;
                 } else {
-                    $order = new WC_Order($_REQUEST['ik_pm_no']);
+                    $order = new WC_Order($data['ik_pm_no']);
                     wp_redirect($order->get_cancel_order_url());
-                    exit();
+                    exit;
                 }
 
             } else {
