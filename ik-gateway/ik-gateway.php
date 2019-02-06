@@ -22,8 +22,6 @@ function ik_init()
             global $woocommerce;
 			
 			$plugin_dir = basename(dirname(__FILE__));
-			// $pathLang = WP_PLUGIN_DIR .'/'. $plugin_dir . '/'. get_locale() .'.mo';
-			// load_textdomain( 'interkassa' , $pathLang );
 			load_plugin_textdomain('interkassa', false, $plugin_dir);
 			
             $this->id = 'interkassa';
@@ -211,7 +209,7 @@ function ik_init()
             $FormData["ik_sign"] = $this->IkSignFormation($FormData, $this->secret);
             $hidden_fields = '';
             foreach ($FormData as $key => $value) {
-                $hidden_fields.= '<input type="hidden" name="' . esc_attr($key) . '" value="' . esc_attr($value) . '" />';
+                $hidden_fields.= '<input type="hidden" name="' . esc_attr($key) . '" value="' . htmlspecialchars($value) . '" />';
             }
 
             $cancel_url = '<a class="button cancel" href="'
