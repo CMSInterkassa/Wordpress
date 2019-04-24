@@ -404,6 +404,10 @@ div.ik-modal-dialog.ik-modal-lg div#plans.ik-modal-content div.container .ik-row
     background-image: none;
 }
 
+.radioBtn.btn-group{
+	z-index: 1;
+}
+
 .radioBtn .btn-primary {
     background-color: #ffffff;
     border-color: #0275d8;
