@@ -2,8 +2,8 @@
 /*
 Plugin Name: InterKassa Gateway
 Description: Платежный шлюз "Интеркасса" для сайтов на WordPress. (версия Интеркассы 2.0)
-Version: 1.8.2
-Last Update: 1.02.2019
+Version: 1.8.3
+Last Update: 24.05.2019
 Author: Interkassa
 Author URI: http://www.interkassa.com
 */
@@ -195,7 +195,7 @@ function ik_init()
                 'ik_cur' => get_woocommerce_currency(),
                 'ik_co_id' => $this->merchant_id,
                 'ik_pm_no' => $order_id,
-                'ik_desc' => "#$order_id",
+                'ik_desc' => "order:$order_id",
                 'ik_loc' => substr(get_locale(),0,2),
                 'ik_ia_u'=>add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/')),
                 'ik_suc_u'=>$this->get_return_url($order),
