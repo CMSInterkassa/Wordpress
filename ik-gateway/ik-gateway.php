@@ -422,7 +422,7 @@ function ik_init()
                 return $businessAcc;
             }
 
-            return $dataBusinessAcc['businessAcc'];
+            return $businessAcc;
         }
     }
 
