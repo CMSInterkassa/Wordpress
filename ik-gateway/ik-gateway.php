@@ -2,8 +2,8 @@
 /*
 Plugin Name: InterKassa Gateway
 Description: Платежный шлюз "Интеркасса" для сайтов на WordPress. (версия Интеркассы 2.0)
-Version: 1.8.3
-Last Update: 24.05.2019
+Version: 1.9
+Last Update: 25.06.2019
 Author: Interkassa
 Author URI: http://www.interkassa.com
 */
@@ -17,6 +17,9 @@ function ik_init()
 
     class WC_Gateway_Interkassa extends WC_Payment_Gateway
     {
+        const ikUrlSCI = 'https://sci.interkassa.com/';
+        const ikUrlAPI = 'https://api.interkassa.com/v1/';
+
         public function __construct()
         {
             global $woocommerce;
@@ -188,20 +191,19 @@ function ik_init()
             global $woocommerce;
 
             $order = new WC_Order($order_id);
-            $action_adr = "https://sci.interkassa.com/";
 
-            $FormData = array(
+            $FormData = [
                 'ik_am' => $order->order_total,
                 'ik_cur' => get_woocommerce_currency(),
                 'ik_co_id' => $this->merchant_id,
                 'ik_pm_no' => $order_id,
-                'ik_desc' => "order:$order_id",
+                'ik_desc' => "order $order_id",
                 'ik_loc' => substr(get_locale(),0,2),
                 'ik_ia_u'=>add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/')),
                 'ik_suc_u'=>$this->get_return_url($order),
                 'ik_fal_u'=>$order->get_cancel_order_url(),
                 'ik_pnd_u'=>$this->get_return_url($order)
-            );
+            ];
             if($this->test_mode)
                 $FormData['ik_pw_via'] = 'test_interkassa_test_xts';
 
@@ -302,7 +304,7 @@ function ik_init()
 
         public function getAnswerFromAPI($data)
 		{
-            $ch = curl_init('https://sci.interkassa.com/');
+            $ch = curl_init(self::ikUrlSCI);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
@@ -333,18 +335,25 @@ function ik_init()
         {
             $username = $ik_api_id;
             $password = $ik_api_key;
-            $remote_url = 'https://api.interkassa.com/v1/paysystem-input-payway?checkoutId=' . $ik_cashbox_id;
+            $remote_url = self::ikUrlAPI . 'paysystem-input-payway?checkoutId=' . $ik_cashbox_id;
 
-            // Create a stream
-            $opts = array(
-                'http' => array(
-                    'method' => "GET",
-                    'header' => "Authorization: Basic " . base64_encode("$username:$password")
-                )
-            );
+            $businessAcc = $this->getIkBusinessAcc($username, $password);
 
-            $context = stream_context_create($opts);
-            $response = file_get_contents($remote_url, false, $context);
+            $ikHeaders = [];
+            $ikHeaders[] = "Authorization: Basic " . base64_encode("$username:$password");
+            if(!empty($businessAcc)) {
+                $ikHeaders[] = "Ik-Api-Account-Id: " . $businessAcc;
+            }
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $remote_url);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+            curl_setopt($ch, CURLOPT_HEADER, false);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $ikHeaders);
+            $response = curl_exec($ch);
+
             $json_data = json_decode($response);			
 			
 			if(empty($response))
@@ -377,6 +386,44 @@ function ik_init()
 			}			
         }
 
+        public function getIkBusinessAcc($username = '', $password = '')
+        {
+            $tmpLocationFile = __DIR__ . '/tmpLocalStorageBusinessAcc.ini';
+            $dataBusinessAcc = function_exists('file_get_contents')? file_get_contents($tmpLocationFile) : '{}';
+            $dataBusinessAcc = json_decode($dataBusinessAcc, 1);
+            $businessAcc = is_string($dataBusinessAcc['businessAcc'])? trim($dataBusinessAcc['businessAcc']) : '';
+            if(empty($businessAcc) || sha1($username . $password) !== $dataBusinessAcc['hash']) {
+                $curl = curl_init();
+                curl_setopt($curl, CURLOPT_URL, self::ikUrlAPI . 'account');
+                curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($curl, CURLOPT_FOLLOWLOCATION, false);
+                curl_setopt($curl, CURLOPT_HEADER, false);
+                curl_setopt($curl, CURLOPT_HTTPHEADER, ["Authorization: Basic " . base64_encode("$username:$password")]);
+                $response = curl_exec($curl);
+
+                if (!empty($response['data'])) {
+                    foreach ($response['data'] as $id => $data) {
+                        if ($data['tp'] == 'b') {
+                            $businessAcc = $id;
+                            break;
+                        }
+                    }
+                }
+
+                if(function_exists('file_put_contents')){
+                    $updData = [
+                        'businessAcc' => $businessAcc,
+                        'hash' => sha1($username . $password)
+                    ];
+                    file_put_contents($tmpLocationFile, json_encode($updData, JSON_PRETTY_PRINT));
+                }
+
+                return $businessAcc;
+            }
+
+            return $dataBusinessAcc['businessAcc'];
+        }
     }
 
     function woocommerce_add_interkassa_gateway($methods)
