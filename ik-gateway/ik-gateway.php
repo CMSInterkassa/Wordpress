@@ -356,7 +356,7 @@ function ik_init()
 
             $json_data = json_decode($response);			
 			
-			if(empty($response))
+			if(empty($json_data))
 				return '<strong style="color:red;">Error!!! System response empty!</strong>';			
 
             if ($json_data->status != 'error') {

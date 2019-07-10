@@ -74,6 +74,11 @@ if($this->enabledAPI == 'yes') {
 	var reqUrlApiIk = '<?php echo $ajax_url;?>';
 	var dataLangIk = {
 		currency_no_select : '<?php _e('Вы не выбрали валюту', 'interkassa');?>'
-	}
+	};	
+	
+    var str=document.createElement('script');
+    str.type='text/javascript';
+    str.src='/wp-content/plugins/ik-gateway/js/interkassa.js';
+    document.body.appendChild(str);
 </script>
-<?php wp_enqueue_script('', '/wp-content/plugins/ik-gateway/js/interkassa.js', [], false, true); ?>
+<?php /*wp_enqueue_script('', '/wp-content/plugins/ik-gateway/js/interkassa.js', [], false, true);*/ ?>
