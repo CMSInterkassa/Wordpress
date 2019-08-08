@@ -23,10 +23,10 @@ function ik_init()
         public function __construct()
         {
             global $woocommerce;
-			
-			$plugin_dir = basename(dirname(__FILE__));
-			load_plugin_textdomain('interkassa', false, $plugin_dir);
-			
+
+            $plugin_dir = basename(dirname(__FILE__));
+            load_plugin_textdomain('interkassa', false, $plugin_dir);
+
             $this->id = 'interkassa';
             $this->has_fields = false;
             $this->method_title = __('Интеркасса 2.0', 'interkassa');
@@ -34,10 +34,10 @@ function ik_init()
             $this->init_form_fields();
             $this->init_settings();
 
-			$this->icon = apply_filters('woocommerce_interkassa_icon', plugin_dir_url(__FILE__) . 'images/logo_interkassa.png');
+            $this->icon = apply_filters('woocommerce_interkassa_icon', plugin_dir_url(__FILE__) . 'images/logo_interkassa.png');
 
             $this->title = $this->get_option('title');
-            $this->test_mode = ($this->get_option('test_mode') == 'yes')? 1 : 0;
+            $this->test_mode = ($this->get_option('test_mode') == 'yes') ? 1 : 0;
             $this->test_key = $this->get_option('test_key');
             $this->description = $this->get_option('description');
             $this->merchant_id = $this->get_option('merchant_id');
@@ -50,10 +50,10 @@ function ik_init()
             $this->payment_method = $this->get_option('payment_method');
 
             $this->ip_stack = array(
-                'ip_begin' => '151.80.190.97',
-                'ip_end'   => '151.80.190.104'
+                '151.80.190.97',
+                '35.233.69.55'//'151.80.190.104'
             );
-            
+
             // Actions
             add_action('woocommerce_receipt_interkassa', array($this, 'receipt_page'));
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
@@ -66,7 +66,7 @@ function ik_init()
 
             // Answer from SCI/API hook
             add_action('woocommerce_api_wc_ik_api', array($this, 'getAnswerFromAPI'));
-  
+
             if (!$this->is_valid_for_use()) {
                 $this->enabled = false;
             }
@@ -88,12 +88,12 @@ function ik_init()
                 ?>
             </table>
 
-            <?php } else { ?>
+        <?php } else { ?>
             <div class="inline error"><p>
                     <strong><?php _e('Шлюз отключен', 'interkassa'); ?></strong>: <?php _e('Единая Касса не поддерживает валюты Вашего магазина.', 'woocommerce'); ?>
                 </p></div>
             <?php
-            }
+        }
         }
 
         public function init_form_fields()
@@ -198,29 +198,29 @@ function ik_init()
                 'ik_co_id' => $this->merchant_id,
                 'ik_pm_no' => $order_id,
                 'ik_desc' => "order $order_id",
-                'ik_loc' => substr(get_locale(),0,2),
-                'ik_ia_u'=>add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/')),
-                'ik_suc_u'=>$this->get_return_url($order),
-                'ik_fal_u'=>$order->get_cancel_order_url(),
-                'ik_pnd_u'=>$this->get_return_url($order)
+                'ik_loc' => substr(get_locale(), 0, 2),
+                'ik_ia_u' => add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/')),
+                'ik_suc_u' => $this->get_return_url($order),
+                'ik_fal_u' => $order->get_cancel_order_url(),
+                'ik_pnd_u' => $this->get_return_url($order)
             ];
-            if($this->test_mode)
+            if ($this->test_mode)
                 $FormData['ik_pw_via'] = 'test_interkassa_test_xts';
 
 
             $FormData["ik_sign"] = $this->IkSignFormation($FormData, $this->secret);
             $hidden_fields = '';
             foreach ($FormData as $key => $value) {
-                $hidden_fields.= '<input type="hidden" name="' . esc_attr($key) . '" value="' . htmlspecialchars($value) . '" />';
+                $hidden_fields .= '<input type="hidden" name="' . esc_attr($key) . '" value="' . htmlspecialchars($value) . '" />';
             }
 
             $cancel_url = '<a class="button cancel" href="'
                 . $order->get_cancel_order_url() .
-                '">' . __('Отказаться от оплаты & вернуться в корзину', 'interkassa') . '</a>';
+                '">' . __('Отказаться от оплаты', 'interkassa') . '</a>';
 
             $ajax_url = add_query_arg('wc-api', 'wc_ik_sign', home_url('/'));
-            $plugin_path = plugin_dir_url('ik-gateway').'ik-gateway/';
-            $image_path = plugin_dir_url('ik-gateway').'ik-gateway/images/';
+            $plugin_path = plugin_dir_url('ik-gateway') . 'ik-gateway/';
+            $image_path = plugin_dir_url('ik-gateway') . 'ik-gateway/images/';
 
             include 'tpl.php';
         }
@@ -229,73 +229,65 @@ function ik_init()
         {
             global $woocommerce;
 
-            if ($_POST['ik_co_id']) {
+            /*if(ip2long($_SERVER['REMOTE_ADDR'])<=ip2long($this->ip_stack['ip_begin']) && ip2long($_SERVER['REMOTE_ADDR'])>=ip2long($this->ip_stack['ip_end'])){
+                die('Ты мошенник! Пшел вон отсюда!');
+            }*/
 
-                if(ip2long($_SERVER['REMOTE_ADDR'])<=ip2long($this->ip_stack['ip_begin']) && ip2long($_SERVER['REMOTE_ADDR'])>=ip2long($this->ip_stack['ip_end'])){
-                    die('Ты мошенник! Пшел вон отсюда!');
+            file_put_contents(__DIR__ . '/t.txt', 'REMOTE_ADDR-' . json_encode($_SERVER['REMOTE_ADDR'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\r\n", FILE_APPEND);
+            file_put_contents(__DIR__ . '/t.txt', 'checkIP-' . json_encode($this->checkIP(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\r\n", FILE_APPEND);
+            file_put_contents(__DIR__ . '/t.txt', 'REQUEST_METHOD-' . json_encode($_SERVER['REQUEST_METHOD'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\r\n", FILE_APPEND);
+
+            if ($this->checkIP() && $_SERVER['REQUEST_METHOD'] == 'POST') {
+                file_put_contents(__DIR__ . '/t.txt', 'if1-' . json_encode((int)$_POST['ik_pm_no'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\r\n", FILE_APPEND);
+
+                $ik_response = $_POST;
+                $order_id = (int)$ik_response['ik_pm_no'];
+                $order = new WC_Order($order_id);
+                if (!$order) {
+                    return false;
                 }
+                if ($this->test_mode)
+                    $key = $this->test_key;
+                else
+                    $key = $this->secret;
+                $ik_sign = $this->IkSignFormation($ik_response, $key);
 
-                if(isset($_POST['ik_pw_via']) && $_POST['ik_pw_via'] == 'test_interkassa_test_xts'){
-                    $ik_key = $this->test_key;
-                } else {
-                    $ik_key = $this->secret;
-                }
-                
-                $merchant_id = $this->merchant_id;
-                $data = array();
-                foreach ($_REQUEST as $key => $value) {
-                    if (!preg_match('/ik_/', $key)) continue;
-                    $data[$key] = $value;
-                }
+                if ($ik_response['ik_sign'] == $ik_sign && ($ik_response['ik_co_id'] == $this->merchant_id)) {
+                    file_put_contents(__DIR__ . '/t.txt', 'if2-' . json_encode('', JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\r\n", FILE_APPEND);
 
-                $ik_sign = $data['ik_sign'];
-                unset($data['ik_sign']);
-                ksort($data, SORT_STRING);
-                array_push($data, $ik_key);
-                $signString = implode(':', $data);
-                $sign = base64_encode(md5($signString, true));
+                    if ($ik_response['ik_inv_st'] == 'success') {
+                        file_put_contents(__DIR__ . '/t.txt', 'if3-' . json_encode('', JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\r\n", FILE_APPEND);
 
-                if ($sign == $ik_sign && $data['ik_co_id'] == $merchant_id) {
-                    $order_id = $data['ik_pm_no'];
-                    $order = new WC_Order($order_id);
-
-                    if ($data['ik_inv_st'] == 'success') {
                         $order->payment_complete();
                         $order->add_order_note(__('Платеж успешно оплачен через Интеркассу', 'interkassa'));
-                    } else if ($data['ik_inv_st'] == 'fail') {
+                    } elseif ($ik_response['ik_inv_st'] == 'fail') {
                         $order->update_status('failed', __('Платеж не оплачен', 'interkassa'));
                         $order->add_order_note(__('Платеж не оплачен', 'interkassa'));
                     }
-
-                    wp_redirect($order->get_return_url($order));
+//                        wp_redirect($order->get_return_url($order));
+                    echo 'OK';
+                    header("HTTP/1.1 200 OK");
                     exit;
                 } else {
-                    $order = new WC_Order($data['ik_pm_no']);
+                    $order = new WC_Order($ik_response['ik_pm_no']);
                     wp_redirect($order->get_cancel_order_url());
                     exit;
                 }
-
-            } else {
-                $woocommerce->cart->empty_cart();
-                wp_redirect(home_url());
-                exit;
-
             }
         }
 
         public function ajaxSign_generate()
-		{
+        {
             header("Pragma: no-cache");
             header("Cache-Control: no-cache, must-revalidate");
             header("Expires: Thu, 01 Jan 1970 00:00:00 GMT");
             header("Content-type: text/plain");
-			$request = $_POST;
+            $request = $_POST;
 
-            if (isset($_POST['ik_act']) && $_POST['ik_act'] == 'process'){
-                $request['ik_sign'] = $this->IkSignFormation($request, $this -> secret);
+            if (isset($_POST['ik_act']) && $_POST['ik_act'] == 'process') {
+                $request['ik_sign'] = $this->IkSignFormation($request, $this->secret);
                 $data = $this->getAnswerFromAPI($request);
-            }
-            else
+            } else
                 $data = $this->IkSignFormation($request, $this->secret);
 
             echo $data;
@@ -303,7 +295,7 @@ function ik_init()
         }
 
         public function getAnswerFromAPI($data)
-		{
+        {
             $ch = curl_init(self::ikUrlSCI);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
@@ -313,23 +305,23 @@ function ik_init()
             exit;
         }
 
-	    public function IkSignFormation($data, $secret_key)
-	    {
-	        if (!empty($data['ik_sign'])) unset($data['ik_sign']);
+        public function IkSignFormation($data, $secret_key)
+        {
+            if (!empty($data['ik_sign'])) unset($data['ik_sign']);
 
-	        $dataSet = array();
-	        foreach ($data as $key => $value) {
-	            if (!preg_match('/ik_/', $key)) continue;
-	            $dataSet[$key] = $value;
-	        }
+            $dataSet = array();
+            foreach ($data as $key => $value) {
+                if (!preg_match('/ik_/', $key)) continue;
+                $dataSet[$key] = $value;
+            }
 
-	        ksort($dataSet, SORT_STRING);
-	        array_push($dataSet, $secret_key);
-	        $arg = implode(':', $dataSet);
-	        $ik_sign = base64_encode(md5($arg, true));
+            ksort($dataSet, SORT_STRING);
+            array_push($dataSet, $secret_key);
+            $arg = implode(':', $dataSet);
+            $ik_sign = base64_encode(md5($arg, true));
 
-	        return $ik_sign;
-	    }
+            return $ik_sign;
+        }
 
         public function getIkPaymentSystems($ik_cashbox_id, $ik_api_id, $ik_api_key)
         {
@@ -341,7 +333,7 @@ function ik_init()
 
             $ikHeaders = [];
             $ikHeaders[] = "Authorization: Basic " . base64_encode("$username:$password");
-            if(!empty($businessAcc)) {
+            if (!empty($businessAcc)) {
                 $ikHeaders[] = "Ik-Api-Account-Id: " . $businessAcc;
             }
 
@@ -354,45 +346,45 @@ function ik_init()
             curl_setopt($ch, CURLOPT_HTTPHEADER, $ikHeaders);
             $response = curl_exec($ch);
 
-            $json_data = json_decode($response);			
-			
-			if(empty($json_data))
-				return '<strong style="color:red;">Error!!! System response empty!</strong>';			
+            $json_data = json_decode($response);
+
+            if (empty($json_data))
+                return '<strong style="color:red;">Error!!! System response empty!</strong>';
 
             if ($json_data->status != 'error') {
                 $payment_systems = array();
-				if(!empty($json_data->data)){
-					foreach ($json_data->data as $ps => $info) {
-						$payment_system = $info->ser;
-						if (!array_key_exists($payment_system, $payment_systems)) {
-							$payment_systems[$payment_system] = array();
-							foreach ($info->name as $name) {
-								if ($name->l == 'en') {
-									$payment_systems[$payment_system]['title'] = ucfirst($name->v);
-								}
-								$payment_systems[$payment_system]['name'][$name->l] = $name->v;
-							}
-						}
-						$payment_systems[$payment_system]['currency'][strtoupper($info->curAls)] = $info->als;
-					}
-				}
-				
-                return !empty($payment_systems)? $payment_systems : '<strong style="color:red;">API connection error or system response empty!</strong>';
+                if (!empty($json_data->data)) {
+                    foreach ($json_data->data as $ps => $info) {
+                        $payment_system = $info->ser;
+                        if (!array_key_exists($payment_system, $payment_systems)) {
+                            $payment_systems[$payment_system] = array();
+                            foreach ($info->name as $name) {
+                                if ($name->l == 'en') {
+                                    $payment_systems[$payment_system]['title'] = ucfirst($name->v);
+                                }
+                                $payment_systems[$payment_system]['name'][$name->l] = $name->v;
+                            }
+                        }
+                        $payment_systems[$payment_system]['currency'][strtoupper($info->curAls)] = $info->als;
+                    }
+                }
+
+                return !empty($payment_systems) ? $payment_systems : '<strong style="color:red;">API connection error or system response empty!</strong>';
             } else {
-                if(!empty($json_data->message))
-					return '<strong style="color:red;">API connection error!<br>' . $json_data->message . '</strong>';
-				else
-					return '<strong style="color:red;">API connection error or system response empty!</strong>';
-			}			
+                if (!empty($json_data->message))
+                    return '<strong style="color:red;">API connection error!<br>' . $json_data->message . '</strong>';
+                else
+                    return '<strong style="color:red;">API connection error or system response empty!</strong>';
+            }
         }
 
         public function getIkBusinessAcc($username = '', $password = '')
         {
             $tmpLocationFile = __DIR__ . '/tmpLocalStorageBusinessAcc.ini';
-            $dataBusinessAcc = function_exists('file_get_contents')? file_get_contents($tmpLocationFile) : '{}';
+            $dataBusinessAcc = function_exists('file_get_contents') ? file_get_contents($tmpLocationFile) : '{}';
             $dataBusinessAcc = json_decode($dataBusinessAcc, 1);
-            $businessAcc = is_string($dataBusinessAcc['businessAcc'])? trim($dataBusinessAcc['businessAcc']) : '';
-            if(empty($businessAcc) || sha1($username . $password) !== $dataBusinessAcc['hash']) {
+            $businessAcc = is_string($dataBusinessAcc['businessAcc']) ? trim($dataBusinessAcc['businessAcc']) : '';
+            if (empty($businessAcc) || sha1($username . $password) !== $dataBusinessAcc['hash']) {
                 $curl = curl_init();
                 curl_setopt($curl, CURLOPT_URL, self::ikUrlAPI . 'account');
                 curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
@@ -411,7 +403,7 @@ function ik_init()
                     }
                 }
 
-                if(function_exists('file_put_contents')){
+                if (function_exists('file_put_contents')) {
                     $updData = [
                         'businessAcc' => $businessAcc,
                         'hash' => sha1($username . $password)
@@ -423,6 +415,18 @@ function ik_init()
             }
 
             return $businessAcc;
+        }
+
+        public function checkIP()
+        {
+            $ip_callback = ip2long($_SERVER['REMOTE_ADDR']) ? ip2long($_SERVER['REMOTE_ADDR']) : !ip2long($_SERVER['REMOTE_ADDR']);
+
+            if ($ip_callback == ip2long($this->ip_stack[0]) || $ip_callback == ip2long($this->ip_stack[1])) {
+                return true;
+            } else {
+                die('Ты мошенник! Пшел вон отсюда!');
+                return false;
+            }
         }
     }
 
