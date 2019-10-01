@@ -2,7 +2,7 @@
 /*
 Plugin Name: InterKassa Gateway
 Description: Платежный шлюз "Интеркасса" для сайтов на WordPress. (версия Интеркассы 2.0)
-Version: 1.9
+Version: 1.10
 Last Update: 25.06.2019
 Author: Interkassa
 Author URI: http://www.interkassa.com
@@ -200,9 +200,9 @@ function ik_init()
                 'ik_desc' => "order $order_id",
                 'ik_loc' => substr(get_locale(), 0, 2),
                 'ik_ia_u' => add_query_arg('wc-api', 'WC_Gateway_Interkassa', home_url('/')),
-                'ik_suc_u' => $this->get_return_url($order),
-                'ik_fal_u' => $order->get_cancel_order_url(),
-                'ik_pnd_u' => $this->get_return_url($order)
+                'ik_suc_u' => str_replace('amp;', '', $this->get_return_url($order)),
+                'ik_fal_u' => str_replace('amp;', '', $order->get_cancel_order_url()),
+                'ik_pnd_u' => str_replace('amp;', '', $this->get_return_url($order))
             ];
             if ($this->test_mode)
                 $FormData['ik_pw_via'] = 'test_interkassa_test_xts';
@@ -229,16 +229,7 @@ function ik_init()
         {
             global $woocommerce;
 
-            /*if(ip2long($_SERVER['REMOTE_ADDR'])<=ip2long($this->ip_stack['ip_begin']) && ip2long($_SERVER['REMOTE_ADDR'])>=ip2long($this->ip_stack['ip_end'])){
-                die('Ты мошенник! Пшел вон отсюда!');
-            }*/
-
-            file_put_contents(__DIR__ . '/t.txt', 'REMOTE_ADDR-' . json_encode($_SERVER['REMOTE_ADDR'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\r\n", FILE_APPEND);
-            file_put_contents(__DIR__ . '/t.txt', 'checkIP-' . json_encode($this->checkIP(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\r\n", FILE_APPEND);
-            file_put_contents(__DIR__ . '/t.txt', 'REQUEST_METHOD-' . json_encode($_SERVER['REQUEST_METHOD'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\r\n", FILE_APPEND);
-
             if ($this->checkIP() && $_SERVER['REQUEST_METHOD'] == 'POST') {
-                file_put_contents(__DIR__ . '/t.txt', 'if1-' . json_encode((int)$_POST['ik_pm_no'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\r\n", FILE_APPEND);
 
                 $ik_response = $_POST;
                 $order_id = (int)$ik_response['ik_pm_no'];
@@ -246,25 +237,23 @@ function ik_init()
                 if (!$order) {
                     return false;
                 }
-                if ($this->test_mode)
+                
+				if($ik_response['ik_pw_via'] == 'test_interkassa_test_xts')
                     $key = $this->test_key;
-                else
+				else
                     $key = $this->secret;
+				
                 $ik_sign = $this->IkSignFormation($ik_response, $key);
 
                 if ($ik_response['ik_sign'] == $ik_sign && ($ik_response['ik_co_id'] == $this->merchant_id)) {
-                    file_put_contents(__DIR__ . '/t.txt', 'if2-' . json_encode('', JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\r\n", FILE_APPEND);
 
                     if ($ik_response['ik_inv_st'] == 'success') {
-                        file_put_contents(__DIR__ . '/t.txt', 'if3-' . json_encode('', JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\r\n", FILE_APPEND);
-
                         $order->payment_complete();
                         $order->add_order_note(__('Платеж успешно оплачен через Интеркассу', 'interkassa'));
                     } elseif ($ik_response['ik_inv_st'] == 'fail') {
                         $order->update_status('failed', __('Платеж не оплачен', 'interkassa'));
                         $order->add_order_note(__('Платеж не оплачен', 'interkassa'));
                     }
-//                        wp_redirect($order->get_return_url($order));
                     echo 'OK';
                     header("HTTP/1.1 200 OK");
                     exit;
@@ -285,24 +274,30 @@ function ik_init()
             $request = $_POST;
 
             if (isset($_POST['ik_act']) && $_POST['ik_act'] == 'process') {
-                $request['ik_sign'] = $this->IkSignFormation($request, $this->secret);
+                // $request['ik_sign'] = $this->IkSignFormation($request, $this->secret);
                 $data = $this->getAnswerFromAPI($request);
-            } else
+				echo $data;
+				exit;
+            } else {
                 $data = $this->IkSignFormation($request, $this->secret);
-
+			}
+			
+			header("Content-type: plain/text");
             echo $data;
             exit;
         }
 
         public function getAnswerFromAPI($data)
         {
-            $ch = curl_init(self::ikUrlSCI);
+            $ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, self::ikUrlSCI);
+			curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
             $result = curl_exec($ch);
-            echo $result;
-            exit;
+			curl_close($ch);
+			
+            return $result;
         }
 
         public function IkSignFormation($data, $secret_key)
@@ -345,7 +340,8 @@ function ik_init()
             curl_setopt($ch, CURLOPT_HEADER, false);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $ikHeaders);
             $response = curl_exec($ch);
-
+			curl_close($ch);
+			
             $json_data = json_decode($response);
 
             if (empty($json_data))
@@ -393,7 +389,8 @@ function ik_init()
                 curl_setopt($curl, CURLOPT_HEADER, false);
                 curl_setopt($curl, CURLOPT_HTTPHEADER, ["Authorization: Basic " . base64_encode("$username:$password")]);
                 $response = curl_exec($curl);
-
+				curl_close($curl);
+				
                 if (!empty($response['data'])) {
                     foreach ($response['data'] as $id => $data) {
                         if ($data['tp'] == 'b') {
