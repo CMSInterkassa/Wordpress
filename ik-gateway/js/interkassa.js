@@ -110,10 +110,10 @@
 	
     $(document).ready(function () {
         $('body').prepend('<div class="blLoaderIK"><div class="loaderIK"></div></div>');
-		if(typeof $.fn.modal == 'undefined'){
+		if(typeof $.fn.modal == 'undefined' || typeof jQuery.fn.modal.Constructor !== 'function'){
 			var s = document.createElement("script");
 			s.src = "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js";
-			$("head").append(s);
+			$("body").append(s);
 		}
 		
         var checkSelCurrPS = [];
