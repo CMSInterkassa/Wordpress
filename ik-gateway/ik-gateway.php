@@ -263,6 +263,7 @@ function ik_init()
                     exit;
                 }
             }
+			die('Bad Request!!!');
         }
 
         public function ajaxSign_generate()
@@ -416,12 +417,12 @@ function ik_init()
 
         public function checkIP()
         {
-            $ip_callback = ip2long($_SERVER['REMOTE_ADDR']) ? ip2long($_SERVER['REMOTE_ADDR']) : !ip2long($_SERVER['REMOTE_ADDR']);
+            $ip = !empty($_SERVER['HTTP_CF_CONNECTING_IP'])? $_SERVER['HTTP_CF_CONNECTING_IP'] : $_SERVER['REMOTE_ADDR'];
+            $ip_callback = ip2long($ip) ? ip2long($ip) : !ip2long($ip);
 
             if ($ip_callback == ip2long($this->ip_stack[0]) || $ip_callback == ip2long($this->ip_stack[1])) {
                 return true;
             } else {
-                die('Ты мошенник! Пшел вон отсюда!');
                 return false;
             }
         }
