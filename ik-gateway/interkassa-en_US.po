@@ -106,3 +106,6 @@ msgstr "Payment not paid"
 
 msgid "Отказаться от оплаты и вернуться в корзину"
 msgstr "Refuse to pay & return to shopping cart"
+
+msgid "Отказаться от оплаты"
+msgstr "Refuse payment"

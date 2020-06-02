@@ -5,7 +5,7 @@
 
 <form name="payment_interkassa" id="InterkassaForm" action="javascript:;" method="POST" class="">
     <?php echo $hidden_fields;?>
-    <input type="submit" value="<?php _e('Оплатить', 'interkassa');?>">
+    <input class="button" type="submit" value="<?php _e('Оплатить', 'interkassa');?>" style="background-color: #ef8989">
     <?php echo $cancel_url;?>
 </form>
 
@@ -31,7 +31,7 @@ if($this->enabledAPI == 'yes') {
                             <?php foreach ($payment_systems as $ps => $info) { ?>
                                 <div class="col-sm-3 text-center payment_system">
                                     <div class="panel panel-warning panel-pricing">
-                                        <div class="panel-heading">
+                                        <div class="ik-panel-heading">
                                             <div class="panel-image">
                                                 <img src="<?php echo $image_path . $ps; ?>.png"
                                                      alt="<?php echo $info['title']; ?>">
@@ -41,7 +41,7 @@ if($this->enabledAPI == 'yes') {
                                             <div class="input-group">
                                                 <div class="radioBtn btn-group">
                                                     <?php foreach ($info['currency'] as $currency => $currencyAlias) { ?>
-                                                        <a class="btn btn-primary btn-sm notActive"
+                                                        <a class="ik-btn btn ik-btn-primary btn-sm notActive"
                                                            data-toggle="fun"
                                                            data-title="<?php echo $currencyAlias; ?>"><?php echo $currency; ?></a>
                                                     <?php } ?>

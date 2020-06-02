@@ -90,7 +90,7 @@
     border-radius: 4px;
     margin-bottom: 1rem;
 }
-.payment_system .panel-heading {
+.payment_system .ik-panel-heading {
     text-align: center;
     color: #8a6d3b;
     background-color: #fcf8e3;
@@ -139,11 +139,11 @@
     box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2);
 }
 
-.panel-pricing .panel-heading {
+.panel-pricing .ik-panel-heading {
     padding: 20px 10px 0;
 }
 
-.panel-pricing .panel-heading h3{
+.panel-pricing .ik-panel-heading h3{
     height: 38px;
     overflow: hidden;
 }
@@ -198,13 +198,13 @@ div.ik-modal-dialog.ik-modal-lg div#plans.ik-modal-content div.container .ik-row
     overflow-y: auto;
 }
 .ik-modal.fade .ik-modal-dialog {
-    -webkit-transform: translate(0, -25%);
-    -ms-transform: translate(0, -25%);
-    -o-transform: translate(0, -25%);
-    transform: translate(0, -25%);
-    -webkit-transition: -webkit-transform 0.3s ease-out;
-    -o-transition: -o-transform 0.3s ease-out;
-    transition: transform 0.3s ease-out;
+    /* -webkit-transform: translate(0, -25%); */
+    /* -ms-transform: translate(0, -25%); */
+    /* -o-transform: translate(0, -25%); */
+    /* transform: translate(0, -25%); */
+    /* -webkit-transition: -webkit-transform 0.3s ease-out; */
+    /* -o-transition: -o-transform 0.3s ease-out; */
+    /* transition: transform 0.3s ease-out; */
 }
 .ik-modal.in .ik-modal-dialog {
     -webkit-transform: translate(0, 0);
@@ -390,6 +390,10 @@ div.ik-modal-dialog.ik-modal-lg div#plans.ik-modal-content div.container .ik-row
     transition: all 0.2s ease-in-out;
 }
 
+.ik-btn{
+	min-width: 25px;
+}
+
 .payment_system .btn:focus, .payment_system .btn:hover {
     text-decoration: none;
 }
@@ -408,7 +412,7 @@ div.ik-modal-dialog.ik-modal-lg div#plans.ik-modal-content div.container .ik-row
 	z-index: 1;
 }
 
-.radioBtn .btn-primary {
+.radioBtn .ik-btn-primary {
     background-color: #ffffff;
     border-color: #0275d8;
     background-image: none;
@@ -417,18 +421,18 @@ div.ik-modal-dialog.ik-modal-lg div#plans.ik-modal-content div.container .ik-row
     margin:5px 0;
 }
 
-.radioBtn .btn-primary:hover {
+.radioBtn .ik-btn-primary:hover {
     color: #fff;
     background-color: #025aa5;
     border-color: #01549b;
 }
 
-.radioBtn .btn-primary:focus {
+.radioBtn .ik-btn-primary:focus {
     -webkit-box-shadow: 0 0 0 2px rgba(2, 117, 216, 0.5);
     box-shadow: 0 0 0 2px rgba(2, 117, 216, 0.5);
 }
 
-.radioBtn .btn-primary:active, .radioBtn .btn-primary.active {
+.radioBtn .ik-btn-primary:active, .radioBtn .ik-btn-primary.active {
     color: #fff;
     background-color: #025aa5;
     background-image: none;
